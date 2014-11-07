@@ -11,7 +11,7 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 3;
+plan tests => 2;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
