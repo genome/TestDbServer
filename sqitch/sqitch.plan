@@ -1,9 +1,10 @@
-%syntax-version=1.0.0-b2
+%syntax-version=1.0.0
 %project=test_db_server
 
 empty_db 2014-09-17T21:31:58Z Anthony Brummett <abrummet@genome.wustl.edu># Initial, empty database
 db_template_table 2014-09-17T21:51:13Z Anthony Brummett <abrummet@genome.wustl.edu># Add db_template table
 live_database_table 2014-09-17T21:51:14Z Anthony Brummett <abrummet@genome.wustl.edu># Add live_database table
+@v0.0.1 2014-11-08T19:09:54Z Nathaniel Nutter <iam@nnutter.com># v0.0.1
 database_template-table 2014-10-10T20:16:22Z Anthony Brummett <abrummet@genome.wustl.edu># Add table for new-style template databases
-switch-template_id-constraint [database_template-table live_database_table] 2014-10-13T19:40:57Z Anthony Brummett <abrummet@genome.wustl.edu># Change the live_database.template_id FK to point to the template_database table
-remove-db_template-table [db_template_table] 2014-10-17T19:47:37Z Anthony Brummett <abrummet@genome.wustl.edu># Remove entity table for old-style templates
+db_template_table [db_template_table@v0.0.1] 2014-11-08T19:11:15Z Nathaniel Nutter <iam@nnutter.com># removing table
+live_database_table [live_database_table@v0.0.1] 2014-11-08T20:28:55Z Nathaniel Nutter <iam@nnutter.com># fix foreign key reference

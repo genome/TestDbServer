@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS live_database (
             owner VARCHAR NOT NULL,
             create_time TIMESTAMP NOT NULL DEFAULT(now()),
             expire_time TIMESTAMP NOT NULL DEFAULT(now() + interval '7 days'),
-            template_id INTEGER REFERENCES db_template(template_id),
+            template_id INTEGER REFERENCES database_template(template_id),
             UNIQUE (host, port, name)
     );
 

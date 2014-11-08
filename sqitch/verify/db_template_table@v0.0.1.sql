@@ -1,4 +1,4 @@
--- Verify remove-db_template-table
+-- Verify db_template_table
 
 BEGIN;
 
