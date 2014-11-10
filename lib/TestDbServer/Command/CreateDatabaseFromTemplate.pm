@@ -21,8 +21,8 @@ sub execute {
     }
 
     my $pg = TestDbServer::PostgresInstance->new(
-                        host => $template->host,
-                        port => $template->port,
+                        host => $self->host,
+                        port => $self->port,
                         owner => $template->owner,
                         superuser => $self->superuser,
                     );
@@ -31,8 +31,8 @@ sub execute {
 
     my $database = $self->schema->create_database(
                         name => $pg->name,
-                        host => $pg->host,
-                        port => $pg->port,
+                        host => $self->host,
+                        port => $self->port,
                         owner => $pg->owner,
                         template_id => $template->template_id,
                     );

@@ -30,8 +30,6 @@ sub execute {
     my $template = $self->schema->create_template(
                                 name => $self->name,
                                 note => $self->note,
-                                host => $database->host,
-                                port => $database->port,
                                 owner => $database->owner,
                             );
 
