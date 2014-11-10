@@ -45,10 +45,6 @@ use Exception::Class (
         isa => 'Exception::ShellCommandFailed',
     },
 
-    Exception::CannotExportDatabase => {
-        isa => 'Exception::ShellCommandFailed',
-    },
-
     Exception::CannotImportDatabase => {
         isa => 'Exception::ShellCommandFailed',
     },

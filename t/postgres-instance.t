@@ -11,7 +11,7 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 3;
+plan tests => 2;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
@@ -77,36 +77,6 @@ subtest 'create db from template' => sub {
     $dbh->disconnect();
     ok($original_pg->dropdb(), 'drop original database');
     ok($copy_pg->dropdb(), 'drop copy database');
-};
-
-subtest 'export db' => sub {
-    plan tests => 6;
-
-    my $pg = TestDbServer::PostgresInstance->new(
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser,
-            );
-    ok($pg->createdb, 'Create database');
-
-    my $dbh = connect_to_db($pg->name);
-    ok($dbh->do(q(CREATE TABLE foo (foo_id integer NOT NULL PRIMARY KEY))),
-        'create table in database');
-
-    my ($fh, $filename) = File::Temp::tempfile(UNLINK => 1);
-    $fh->close();
-    ok($pg->exportdb($filename), 'export');
-    ok(-f $filename, "exported file exists: $filename");
-    my $contents = do {
-        local $/;
-        open(my $fh, '<', $filename);
-        <$fh>;
-    };
-    like($contents, qr/^CREATE TABLE foo/mi, 'Dump contains expected CREATE TABLE');
-
-    $dbh->disconnect();
-    ok($pg->dropdb(), 'drop database');
 };
 
 sub connect_to_db {

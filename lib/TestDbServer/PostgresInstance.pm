@@ -108,32 +108,6 @@ sub dropdb {
     return 1;
 }
 
-sub exportdb {
-    my($self, $filename) = @_;
-
-    my $pg_dump = $self->app_pg->pg_dump;
-
-    my $host = $self->host;
-    my $port = $self->port;
-    my $superuser = $self->superuser;
-    my $name = $self->name;
-
-    my $runner = TestDbServer::CommandLineRunner->new(
-                        $pg_dump,
-                        '-h', $host,
-                        '-p', $port,
-                        '-U', $superuser,
-                        '-f', $filename,
-                        $name,
-                     );
-    unless ($runner->rv) {
-        Exception::CannotExportDatabase->throw(error => "$pg_dump failed",
-                                               output => $runner->output,
-                                               child_error => $runner->child_error);
-    }
-    return 1;
-}
-
 __PACKAGE__->meta->make_immutable;
 
 1;
