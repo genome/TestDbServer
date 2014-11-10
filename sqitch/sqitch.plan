@@ -8,3 +8,4 @@ database_template-table 2014-10-10T20:16:22Z Anthony Brummett <abrummet@genome.w
 switch-template_id-constraint [database_template-table live_database_table] 2014-10-13T19:40:57Z Anthony Brummett <abrummet@genome.wustl.edu># Change the live_database.template_id FK to point to the template_database table
 remove-db_template-table [db_template_table] 2014-10-17T19:47:37Z Anthony Brummett <abrummet@genome.wustl.edu># Remove entity table for old-style templates
 database_template-drop_host_and_port [database_template-table] 2014-11-10T20:34:39Z Nathaniel Nutter <iam@nnutter.com># drop host and port columns
+seed-template1 [database_template-drop_host_and_port] 2014-11-10T20:57:36Z Nathaniel Nutter <iam@nnutter.com># seed the template database with an entry for template1
