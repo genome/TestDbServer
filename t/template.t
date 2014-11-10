@@ -31,8 +31,8 @@ subtest 'list' => sub {
     
     my $db = $app->db_storage;
     my $owner = $uuid_gen->create_str;
-    @templates = (  $db->create_template(name => $uuid_gen->create_str, owner => $owner, host => 'localhost', port => 123),
-                    $db->create_template(name => $uuid_gen->create_str, owner => $owner, host => 'localhost', port => 123),
+    @templates = (  $db->create_template(name => $uuid_gen->create_str, owner => $owner),
+                    $db->create_template(name => $uuid_gen->create_str, owner => $owner),
                 );
 
     $req = $t->get_ok('/templates')
@@ -62,14 +62,12 @@ subtest 'search' => sub {
 };
 
 subtest 'get' => sub {
-    plan tests => 13;
+    plan tests => 11;
 
     $t->get_ok('/templates/'.$templates[0]->template_id)
         ->status_is(200)
         ->json_is('/template_id' => $templates[0]->template_id)
         ->json_is('/name' => $templates[0]->name)
-        ->json_is('/host' => $templates[0]->host)
-        ->json_is('/port' => $templates[0]->port)
         ->json_is('/note' => undef)
         ->json_has('/create_time')
         ->json_has('/last_used_time');
