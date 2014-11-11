@@ -6,6 +6,7 @@ use TestDbServer::Exceptions;
 use Moose;
 use namespace::autoclean;
 
+has owner => ( isa => 'Maybe[Str]', is => 'ro', required => 1 );
 has host => ( isa => 'Str', is => 'ro', required => 1 );
 has port => ( isa => 'Int', is => 'ro', required => 1 );
 has template_id => ( isa => 'Str', is => 'ro', required => 1 );
@@ -20,10 +21,11 @@ sub execute {
         Exception::TemplateNotFound->throw(template_id => $self->template_id);
     }
 
+    my $owner = $self->owner || $template->owner;
     my $pg = TestDbServer::PostgresInstance->new(
                         host => $self->host,
                         port => $self->port,
-                        owner => $template->owner,
+                        owner => $owner,
                         superuser => $self->superuser,
                     );
 

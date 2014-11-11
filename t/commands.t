@@ -156,6 +156,7 @@ subtest 'create database from template' => sub {
     }
 
     my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                    owner => undef,
                     host => $config->db_host,
                     port => $config->db_port,
                     template_id => $template->template_id,
