@@ -96,8 +96,6 @@ subtest 'create from template' => sub {
 
     my $template = $db->create_template(
                                             name => $pg->name,
-                                            host => $pg->host,
-                                            port => $pg->port,
                                             owner => $pg->owner,
                                         );
 

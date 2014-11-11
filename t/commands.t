@@ -65,7 +65,8 @@ subtest 'create template from database' => sub {
 
     # connect to the template database
     my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
-                                    $template->name, $template->host, $template->port));
+                                    $template->name, $pg->host, $pg->port),
+                            $pg->owner, '');
     ok($dbi->do("SELECT foo FROM $table_name WHERE FALSE"), 'table exists in template database');
     $dbi->disconnect;
 
@@ -74,8 +75,8 @@ subtest 'create template from database' => sub {
 
     # remove the template database
     TestDbServer::PostgresInstance->new(
-                        host => $template->host,
-                        port => $template->port,
+                        host => $pg->host,
+                        port => $pg->port,
                         owner => $template->owner,
                         superuser => $config->db_user,
                         name => $template->name
@@ -111,8 +112,6 @@ subtest 'create database' => sub {
     # with a template ID
     my $template = $schema->create_template(
                                 name => $uuid_gen->create_str,
-                                host => $blank_db->host,
-                                port => $blank_db->port,
                                 owner => $config->test_db_owner,
                             );
     my $create_db_cmd = TestDbServer::Command::CreateDatabase->new(
@@ -143,7 +142,7 @@ subtest 'create database from template' => sub {
     my $pg = new_pg_instance();
 
     note('original template named '.$pg->name);
-    my $template = $schema->create_template( map { $_ => $pg->$_ } qw( host port name owner ) );
+    my $template = $schema->create_template( map { $_ => $pg->$_ } qw( name owner ) );
     # Make a table in the template
     my $table_name = "test_table_$$";
     {
@@ -169,7 +168,8 @@ subtest 'create database from template' => sub {
 
     # connect to the template database
     my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
-                                    $database->name, $database->host, $database->port));
+                                    $database->name, $database->host, $database->port),
+                            $database->owner, '');
     ok($dbi->do("SELECT foo FROM $table_name WHERE FALSE"), 'table exists in template database');
     $dbi->disconnect;
 
@@ -193,8 +193,6 @@ subtest 'delete template' => sub {
 
     my $template = $schema->create_template(
                                 name => $pg->name,
-                                host => $pg->host,
-                                port => $pg->port,
                                 owner => $pg->owner,
                             );
 

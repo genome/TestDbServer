@@ -47,8 +47,6 @@ Returns 200 and JSON in the body
     owner: String - Database role, owner of the databases created from
                     this template
     note: String - human readable info about this template
-    host: String - The DB host this template database lives in
-    port: Integer - The port this template's Database listens on
 }
 
 Returns 404 if there's no template with that ID

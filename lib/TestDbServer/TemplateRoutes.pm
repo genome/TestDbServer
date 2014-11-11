@@ -73,7 +73,7 @@ sub get {
 
     if ($template) {
         $self->app->log->info("found template $id");
-        my %template = map { $_ => $template->$_ } qw(template_id name owner note host port create_time last_used_time);
+        my %template = map { $_ => $template->$_ } qw(template_id name owner note create_time last_used_time);
         $self->render(json => \%template);
 
     } elsif ($error) {
