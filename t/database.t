@@ -64,11 +64,14 @@ subtest 'search' => sub {
 subtest 'get' => sub {
     plan tests => 14;
 
+    my $expected_host = $t->app->configuration->db_host;
+    my $expected_port = $t->app->configuration->db_port;
+
     $t->get_ok('/databases/'.$databases[0]->database_id)
         ->status_is(200)
         ->json_is('/id' => $databases[0]->database_id)
-        ->json_is('/host' => 'foo')
-        ->json_is('/port' => '123' )
+        ->json_is('/host', $expected_host)
+        ->json_is('/port', $expected_port)
         ->json_is('/name' => $databases[0]->name)
         ->json_is('/owner' => $databases[0]->owner)
         ->json_is('/template_id' => undef)
