@@ -118,18 +118,13 @@ sub _hashref_for_database_obj {
 sub create {
     my $self = shift;
 
-    if (my $template_id = $self->req->param('based_on')) {
-        $self->app->log->info("create database from template $template_id");
-        $self->_create_database_from_template($template_id);
+    my $schema = $self->app->db_storage();
+    my $default_template_id = $schema->search_template(name => 'template1')->next->id;
+    my $template_id = $self->req->param('based_on') || $default_template_id;
+    my $owner = $self->req->param('owner');
 
-    } elsif (my $owner = $self->req->param('owner')) {
-        $self->app->log->info("create database with owner $owner");
-        $self->_create_new_database($owner);
-
-    } else {
-        $self->app->log->error('create databse with bad params');
-        $self->render_not_found;
-    }
+    $self->app->log->info("create database from template $template_id");
+    $self->_create_database_from_template($owner, $template_id);
 }
 
 sub _create_new_database {
@@ -149,11 +144,12 @@ sub _create_new_database {
 }
 
 sub _create_database_from_template {
-    my($self, $template_id) = @_;
+    my($self, $owner, $template_id) = @_;
 
     $self->_create_database_common(sub {
             my($host, $port) = $self->app->host_and_port_for_created_database();
             TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                            owner => $owner,
                             template_id => $template_id,
                             host => $host,
                             port => $port,
