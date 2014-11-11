@@ -43,6 +43,7 @@ sub get_user_agent {
         $ua = LWP::UserAgent->new;
         $ua->agent("TestDbServer::CmdLine/0.1 ");
         $ua->timeout(5);
+        push @{ $ua->requests_redirectable }, 'POST';
     }
     return $ua;
 }
