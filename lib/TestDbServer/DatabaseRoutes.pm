@@ -119,11 +119,14 @@ sub create {
     my $self = shift;
 
     my $schema = $self->app->db_storage();
-    my $default_template_id = $schema->search_template(name => 'template1')->next->id;
-    my $template_id = $self->req->param('based_on') || $default_template_id;
+    my $template_id = $self->req->param('based_on');
     my $owner = $self->req->param('owner');
-
-    $self->app->log->info("create database from template $template_id");
+    if ($template_id) {
+        $self->app->log->info("create database from template $template_id");
+    }
+    else {
+        $self->app->log->info("create database from default template");
+    }
     $self->_create_database_from_template($owner, $template_id);
 }
 
