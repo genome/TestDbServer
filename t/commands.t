@@ -127,7 +127,7 @@ subtest 'create database with owner' => sub {
         $dbi->disconnect;
     }
 
-    my $new_owner = 'genome';
+    my $new_owner = $config->db_user;
     my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                     owner => $new_owner,
                     host => $config->db_host,
