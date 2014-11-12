@@ -29,6 +29,11 @@ sub execute {
                         superuser => $self->superuser,
                     );
 
+    if ($owner ne $self->superuser) {
+        my $dbh = $self->schema->storage->dbh();
+        grant_role($dbh, $owner, $self->superuser);
+    }
+
     $pg->createdb_from_template($template->name);
 
     my $database = $self->schema->create_database(
@@ -43,6 +48,11 @@ sub execute {
     $template->update({ last_used_time => \$update_last_used_sql });
 
     return $database;
+}
+
+sub grant_role {
+    my ($dbh, $source, $target) = @_;
+    $dbh->do(sprintf('GRANT %s to %s', $source, $target));
 }
 
 __PACKAGE__->meta->make_immutable;
