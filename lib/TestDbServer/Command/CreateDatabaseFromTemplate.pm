@@ -6,6 +6,8 @@ use TestDbServer::Exceptions;
 use Moose;
 use namespace::autoclean;
 
+use constant DEFAULT_TEMPLATE_NAME => 'template1';
+
 has owner => ( isa => 'Maybe[Str]', is => 'ro', required => 1 );
 has host => ( isa => 'Str', is => 'ro', required => 1 );
 has port => ( isa => 'Int', is => 'ro', required => 1 );
@@ -17,7 +19,7 @@ sub execute {
     my $self = shift;
 
     my $default_template_id = $self->schema
-                                   ->search_template(name => 'template1')
+                                   ->search_template(name => DEFAULT_TEMPLATE_NAME)
                                    ->next->id;
     my $template_id = defined $self->template_id
                     ? $self->template_id
