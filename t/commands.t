@@ -17,7 +17,6 @@ use Data::UUID;
 
 use TestDbServer::Command::SaveTemplateFile;
 use TestDbServer::Command::CreateTemplateFromDatabase;
-use TestDbServer::Command::CreateDatabase;
 use TestDbServer::Command::CreateDatabaseFromTemplate;
 use TestDbServer::Command::DeleteTemplate;
 use TestDbServer::Command::DeleteDatabase;
@@ -87,7 +86,7 @@ subtest 'create database' => sub {
     plan tests => 3;
 
     # blank database
-    my $create_blank_db_cmd = TestDbServer::Command::CreateDatabase->new(
+    my $create_blank_db_cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                                 host => $config->db_host,
                                 port => $config->db_port,
                                 owner => $config->test_db_owner,
@@ -275,7 +274,7 @@ subtest 'delete template' => sub {
 subtest 'delete database' => sub {
     plan tests => 5;
 
-    my $database = TestDbServer::Command::CreateDatabase->new(
+    my $database = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                             host => $config->db_host,
                             port => $config->db_port,
                             owner => $config->test_db_owner,
@@ -308,7 +307,7 @@ subtest 'delete database' => sub {
 subtest 'delete with connections' => sub {
     plan tests => 5;
 
-    my $database = TestDbServer::Command::CreateDatabase->new(
+    my $database = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                             host => $config->db_host,
                             port => $config->db_port,
                             owner => $config->test_db_owner,
