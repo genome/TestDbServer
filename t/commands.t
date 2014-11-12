@@ -84,7 +84,7 @@ subtest 'create template from database' => sub {
 };
 
 subtest 'create database' => sub {
-    plan tests => 6;
+    plan tests => 3;
 
     # blank database
     my $create_blank_db_cmd = TestDbServer::Command::CreateDatabase->new(
@@ -107,33 +107,6 @@ subtest 'create database' => sub {
                                 superuser => $config->db_user,
                         );
     ok($blank_pg->dropdb, 'drop blank db');
-
-
-    # with a template ID
-    my $template = $schema->create_template(
-                                name => $uuid_gen->create_str,
-                                owner => $config->test_db_owner,
-                            );
-    my $create_db_cmd = TestDbServer::Command::CreateDatabase->new(
-                                host => $config->db_host,
-                                port => $config->db_port,
-                                owner => $config->test_db_owner,
-                                superuser => $config->db_user,
-                                template_id => $template->template_id,
-                                schema => $schema,
-                            );
-    ok($create_db_cmd, 'new - create with template');
-    my $db = $create_db_cmd->execute();
-    ok($db, 'execute - with template');
-
-    my $db_pg =  TestDbServer::PostgresInstance->new(
-                                host => $db->host,
-                                port => $db->port,
-                                name => $db->name,
-                                owner => $db->owner,
-                                superuser => $config->db_user,
-                        );
-    ok($db_pg->dropdb, 'drop db');
 };
 
 subtest 'create database with owner' => sub {
