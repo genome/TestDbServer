@@ -131,8 +131,11 @@ The Location header will be the URL for this entity
 -----------------------------------------------------
 
 POST /databases?based_on=<template-id>
+POST /databases?based_on=<template-id>&owner=<owner-name>
 
-Create a new database and populate it with the given database template
+Create a new database and populate it with the given database template.
+Optionally specifying an owner name to use instead of the owner of the
+template.
 
 Returns 201 and JSON in the body
 {
