@@ -70,7 +70,7 @@ sub get {
 
     if ($database) {
         $self->app->log->info("found database $id");
-        $self->render(json => _hashref_for_database_obj($database));
+        $self->render(json => $self->_hashref_for_database_obj($database));
 
     } elsif ($error) {
         $self->app->log->error("Cannot get database $id");
@@ -107,7 +107,7 @@ sub _remove_expired_databases {
 }
 
 sub _hashref_for_database_obj {
-    my $database = shift;
+    my($self, $database) = @_;
 
     my %h;
     @h{'id','host','port','name','owner','created','expires','template_id'}
@@ -193,7 +193,7 @@ sub _create_database_common {
         my $response_location = TestDbServer::Utils::id_url_for_request_and_entity_id($self->req, $database->database_id);
         $self->res->headers->location($response_location);
 
-        $self->render(status => 201, json => _hashref_for_database_obj($database));
+        $self->render(status => 201, json => $self->_hashref_for_database_obj($database));
 
     } else {
         $self->rendered($return_code);
@@ -281,7 +281,7 @@ sub patch {
         my $response_location = TestDbServer::Utils::id_url_for_request_and_entity_id($self->req, $database->database_id);
         $self->res->headers->location($response_location);
 
-        $self->render(status => 200, json => _hashref_for_database_obj($database));
+        $self->render(status => 200, json => $self->_hashref_for_database_obj($database));
 
     } else {
         $self->rendered($return_code);
