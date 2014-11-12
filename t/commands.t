@@ -140,7 +140,7 @@ subtest 'create database with owner' => sub {
     my $database = $cmd->execute();
     ok($database, 'execute');
 
-    # connect to the template database
+    # connect to the newly created database
     my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
                                     $database->name, $database->host, $database->port),
                             $pg->owner, '');
@@ -231,7 +231,7 @@ subtest 'create database from template' => sub {
     my $database = $cmd->execute();
     ok($database, 'execute');
 
-    # connect to the template database
+    # connect to the newly created database
     my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
                                     $database->name, $database->host, $database->port),
                             $database->owner, '');
