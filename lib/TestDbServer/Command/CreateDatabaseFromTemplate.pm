@@ -52,6 +52,16 @@ sub execute {
 
 sub grant_role {
     my ($dbh, $source, $target) = @_;
+
+    my $is_valid_role = sub {
+        my $row = $dbh->selectrow_arrayref(q(SELECT 1 FROM pg_roles WHERE rolname=?), undef, @_);
+        return $row->[0];
+    };
+    for my $role_name ($source, $target) {
+        unless ($is_valid_role->($role_name)) {
+            Exception::RoleNotFound->throw(role_name => $role_name);
+        }
+    }
     $dbh->do(sprintf('GRANT %s to %s', $source, $target));
 }
 
