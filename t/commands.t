@@ -342,7 +342,7 @@ sub new_pg_instance {
             owner => $config->test_db_owner,
             superuser => $config->db_user,
         );
-    $pg->createdb();
+    $pg->createdb_from_template('template1');
     return $pg;
 }
 

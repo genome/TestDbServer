@@ -31,7 +31,7 @@ subtest 'create connect delete' => sub {
     ok($pg, 'Created new PostgresInstance');
     ok($pg->name, 'has a name: '. $pg->name);
 
-    ok($pg->createdb, 'Create database');
+    ok($pg->createdb_from_template('template1'), 'Create database');
 
     my $db_name = $pg->name;
     ok(connect_to_db($db_name), 'Connected');
@@ -49,7 +49,7 @@ subtest 'create db from template' => sub {
                 owner => $owner,
                 superuser => $superuser,
             );
-    ok($original_pg->createdb, 'Create original DB');
+    ok($original_pg->createdb_from_template('template1'), 'Create original DB');
     {
         my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
                                         $original_pg->name, $original_pg->host, $original_pg->port),

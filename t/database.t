@@ -92,7 +92,7 @@ subtest 'create from template' => sub {
                     owner => $config->test_db_owner,
                     superuser => $config->db_user,
                 );
-    ok( $pg->createdb(), 'create database to use as a template');
+    ok( $pg->createdb_from_template('template1'), 'create database to use as a template');
 
     my $template = $db->create_template(
                                             name => $pg->name,
