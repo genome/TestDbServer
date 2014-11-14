@@ -11,11 +11,6 @@ GetOptions($opts, 'owner=s', 'based-on=s','short-help','help');
 print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
-unless ($opts->{owner} xor $opts->{'based-on'}) {
-    print STDERR "You must use one of --owner or --based-on, but not both\n";
-    exit 1;
-}
-
 my $ua = get_user_agent();
 my @options = make_post_options($opts);
 my $req = HTTP::Request->new(POST => url_for('databases', \@options));

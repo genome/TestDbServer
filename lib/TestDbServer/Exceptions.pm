@@ -58,6 +58,11 @@ use Exception::Class (
         isa => 'Exception::BaseException',
         fields => [qw(template_id)],
     },
+
+    Exception::RoleNotFound => {
+        isa => 'Exception::BaseException',
+        fields => [qw(role_name)],
+    },
 );
 
 package Exception::BaseException;

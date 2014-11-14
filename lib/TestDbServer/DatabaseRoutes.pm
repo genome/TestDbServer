@@ -4,7 +4,6 @@ use Mojo::Base 'Mojolicious::Controller';
 use Try::Tiny;
 
 use TestDbServer::Utils;
-use TestDbServer::Command::CreateDatabase;
 use TestDbServer::Command::CreateDatabaseFromTemplate;
 use TestDbServer::Command::DeleteDatabase;
 
@@ -124,42 +123,25 @@ sub _hashref_for_database_obj {
 sub create {
     my $self = shift;
 
-    if (my $template_id = $self->req->param('based_on')) {
+    my $schema = $self->app->db_storage();
+    my $template_id = $self->req->param('based_on');
+    my $owner = $self->req->param('owner');
+    if ($template_id) {
         $self->app->log->info("create database from template $template_id");
-        $self->_create_database_from_template($template_id);
-
-    } elsif (my $owner = $self->req->param('owner')) {
-        $self->app->log->info("create database with owner $owner");
-        $self->_create_new_database($owner);
-
-    } else {
-        $self->app->log->error('create databse with bad params');
-        $self->render_not_found;
     }
-}
-
-sub _create_new_database {
-    my($self, $owner) = @_;
-
-    $self->_create_database_common(sub {
-            my($host, $port) = $self->app->host_and_port_for_created_database();
-            my $cmd = TestDbServer::Command::CreateDatabase->new(
-                            owner => $owner,
-                            template_id => undef,
-                            host => $host,
-                            port => $port,
-                            superuser => $self->app->configuration->db_user,
-                            schema => $self->app->db_storage,
-                    );
-        });
+    else {
+        $self->app->log->info("create database from default template");
+    }
+    $self->_create_database_from_template($owner, $template_id);
 }
 
 sub _create_database_from_template {
-    my($self, $template_id) = @_;
+    my($self, $owner, $template_id) = @_;
 
     $self->_create_database_common(sub {
             my($host, $port) = $self->app->host_and_port_for_created_database();
             TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                            owner => $owner,
                             template_id => $template_id,
                             host => $host,
                             port => $port,
