@@ -55,6 +55,8 @@ subtest 'create template from database' => sub {
                     database_id => $database->database_id,
                     schema => $schema,
                     superuser => $config->db_user,
+                    host => $pg->host,
+                    port => $pg->port,
                 );
     ok($cmd, 'new');
     my $template_id = $cmd->execute();
@@ -100,8 +102,8 @@ subtest 'create database' => sub {
     ok($blank_db->database_id, 'execute - blank db');
 
     my $blank_pg = TestDbServer::PostgresInstance->new(
-                                host => $blank_db->host,
-                                port => $blank_db->port,
+                                host => $config->db_host,
+                                port => $config->db_port,
                                 name => $blank_db->name,
                                 owner => $blank_db->owner,
                                 superuser => $config->db_user,
@@ -127,8 +129,8 @@ subtest 'create database' => sub {
     ok($db, 'execute - with template');
 
     my $db_pg =  TestDbServer::PostgresInstance->new(
-                                host => $db->host,
-                                port => $db->port,
+                                host => $config->db_host,
+                                port => $config->db_port,
                                 name => $db->name,
                                 owner => $db->owner,
                                 superuser => $config->db_user,
@@ -168,7 +170,7 @@ subtest 'create database from template' => sub {
 
     # connect to the template database
     my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
-                                    $database->name, $database->host, $database->port),
+                                    $database->name, $config->db_host, $config->db_port),
                             $database->owner, '');
     ok($dbi->do("SELECT foo FROM $table_name WHERE FALSE"), 'table exists in template database');
     $dbi->disconnect;
@@ -178,8 +180,8 @@ subtest 'create database from template' => sub {
 
     # remove the created database
     TestDbServer::PostgresInstance->new(
-                        host => $database->host,
-                        port => $database->port,
+                        host => $config->db_host,
+                        port => $config->db_port,
                         owner => $database->owner,
                         superuser => $config->db_user,
                         name => $database->name
@@ -223,6 +225,8 @@ subtest 'delete database' => sub {
                             database_id => $database->database_id,
                             schema => $schema,
                             superuser => $config->db_user,
+                            host => $config->db_host,
+                            port => $config->db_port,
                         );
     ok($cmd, 'new delete database');
     ok($cmd->execute(), 'execute delete database');
@@ -232,6 +236,8 @@ subtest 'delete database' => sub {
                             database_id => 'bogus',
                             schema => $schema,
                             superuser => $config->db_user,
+                            host => $config->db_host,
+                            port => $config->db_port,
                         );
     ok($cmd, 'new delete not existant');
     throws_ok { $cmd->execute() }
@@ -252,7 +258,7 @@ subtest 'delete with connections' => sub {
                     )->execute();
     ok($database, 'Create database');
     my $dbh = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
-                                    $database->name, $database->host, $database->port),
+                                    $database->name, $config->db_host, $config->db_port),
                             $database->owner,
                             '');
     ok($dbh, 'connect to created database');
@@ -260,6 +266,8 @@ subtest 'delete with connections' => sub {
                                     database_id => $database->id,
                                     schema => $schema,
                                     superuser => $config->db_user,
+                                    host => $config->db_host,
+                                    port => $config->db_port,
                                 );
     ok($cmd, 'new');
     throws_ok { $cmd->execute() }

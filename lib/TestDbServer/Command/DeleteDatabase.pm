@@ -9,6 +9,8 @@ use namespace::autoclean;
 has database_id => ( isa => 'Str', is => 'ro', required => 1 );
 has schema => (isa => 'TestDbServer::Schema', is => 'ro', required => 1 );
 has superuser => ( isa => 'Str', is => 'ro', required => 1 );
+has host => ( isa => 'Str', is => 'ro', required => 1 );
+has port => ( isa => 'Str', is => 'ro', required => 1 );
 
 sub execute {
     my $self = shift;
@@ -20,8 +22,8 @@ sub execute {
 
     my $pg = TestDbServer::PostgresInstance->new(
                         name => $database->name,
-                        host => $database->host,
-                        port => $database->port,
+                        host => $self->host,
+                        port => $self->port,
                         owner => $database->owner,
                         superuser => $self->superuser,
                     );

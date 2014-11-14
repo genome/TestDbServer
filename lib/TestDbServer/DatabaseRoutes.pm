@@ -88,6 +88,8 @@ sub _remove_expired_databases {
     my $schema = $self->app->db_storage;
 
     my $database_set = $schema->search_expired_databases();
+    my($host,$port) = $self->app->host_and_port_for_created_database();
+
     while (my $database = $database_set->next()) {
         try {
             $schema->txn_do(sub {
@@ -96,6 +98,8 @@ sub _remove_expired_databases {
                                 schema => $schema,
                                 database_id => $database->database_id,
                                 superuser => $self->app->configuration->db_user,
+                                host => $host,
+                                port => $port,
                             );
                 $cmd->execute();
             });
@@ -211,10 +215,13 @@ sub delete {
     my $schema = $self->app->db_storage;
     my $return_code;
     try {
+        my($host, $port) = $self->app->host_and_port_for_created_database();
         my $cmd = TestDbServer::Command::DeleteDatabase->new(
                         database_id => $id,
                         schema => $schema,
                         superuser => $self->app->configuration->db_user,
+                        host => $host,
+                        port => $port,
                     );
         $schema->txn_do(sub {
             $cmd->execute();
