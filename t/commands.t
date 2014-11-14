@@ -34,7 +34,7 @@ subtest 'create template from database' => sub {
     my $pg = new_pg_instance();
 
     note('original database named '.$pg->name);
-    my $database = $schema->create_database( map { $_ => $pg->$_ } qw( host port name owner ) );
+    my $database = $schema->create_database( map { $_ => $pg->$_ } qw( name owner ) );
     # Make a table in the database
     my $table_name = "test_table_$$";
     {

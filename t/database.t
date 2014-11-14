@@ -32,8 +32,8 @@ subtest 'list' => sub {
 
     my $db = $app->db_storage;
     my $owner = $uuid_gen->create_str;
-    @databases = ( $db->create_database( host => 'foo', port => '123', name => $uuid_gen->create_str, owner => $owner ),
-                   $db->create_database( host => 'bar', port => '456', name => $uuid_gen->create_str, owner => $owner ),
+    @databases = ( $db->create_database( name => $uuid_gen->create_str, owner => $owner ),
+                   $db->create_database( name => $uuid_gen->create_str, owner => $owner ),
                 );
     $r = $t->get_ok('/databases')
       ->status_is(200);
@@ -53,7 +53,7 @@ subtest 'search' => sub {
         ->status_is(200)
         ->json_is([ map { $_->database_id } @databases ]);
 
-    $t->get_ok('/databases?host=garbage')
+    $t->get_ok('/databases?name=garbage')
         ->status_is(200)
         ->json_is([]);
 

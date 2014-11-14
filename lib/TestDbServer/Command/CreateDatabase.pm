@@ -23,8 +23,6 @@ sub execute {
                     );
 
     my $database = $self->schema->create_database(
-                        host => $self->host,
-                        port => $self->port,
                         name => $pg->name,
                         owner => $self->owner,
                         template_id => $self->template_id,
