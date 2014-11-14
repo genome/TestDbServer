@@ -39,8 +39,8 @@ has 'name' => (
     sub app_pg { return $app_pg }
 }
 
-sub _createdb_common {
-    my $self = shift;
+sub createdb_from_template {
+    my($self, $template_name) = @_;
 
     my $createdb = $self->app_pg->createdb;
 
@@ -50,7 +50,7 @@ sub _createdb_common {
                         '-p', $self->port,
                         '-U', $self->superuser,
                         '-O', $self->owner,
-                        @_,
+                        '-T', $template_name,
                         $self->name,
                     );
     unless ($runner->rv) {
@@ -59,15 +59,6 @@ sub _createdb_common {
                                                child_error => $runner->child_error);
     }
     return 1;
-}
-
-
-sub createdb_from_template {
-    my($self, $template_name) = @_;
-
-    return $self->_createdb_common(
-                '-T', $template_name,
-            );
 }
 
 my $uuid_gen = Data::UUID->new();
