@@ -39,12 +39,6 @@ has 'name' => (
     sub app_pg { return $app_pg }
 }
 
-sub createdb {
-    my $self = shift;
-
-    return $self->_createdb_common();
-}
-
 sub _createdb_common {
     my $self = shift;
 
