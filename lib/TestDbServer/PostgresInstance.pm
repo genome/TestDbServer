@@ -62,7 +62,7 @@ sub _build_admin_dbh {
     my($host, $port, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'superuser', 'superuser_passwd' );
     return DBI->connect_cached("dbi:Pg:dbname=template1;port=$port;host=$host",
                                $user, $pass,
-                               { RaiseError => 1, PrintError => 1 });
+                               { RaiseError => 1, PrintError => 0 });
 }
 
 sub createdb_from_template {
