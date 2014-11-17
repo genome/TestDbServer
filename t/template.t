@@ -4,11 +4,12 @@ use Test::More;
 use Test::Mojo;
 use Test::Deep qw(cmp_deeply supersetof);
 use Mojo::JSON;
-use Data::UUID;
 
 use File::Temp qw();
 
 use TestDbServer::Configuration;
+use TestDbServer::PostgresInstance;
+
 plan tests => 5;
 
 my $config = TestDbServer::Configuration->new_from_path();
@@ -16,8 +17,6 @@ my $config = TestDbServer::Configuration->new_from_path();
 my $t = Test::Mojo->new('TestDbServer');
 my $app = $t->app;
 $app->configuration($config);
-
-my $uuid_gen = Data::UUID->new();
 
 my @templates;
 subtest 'list' => sub {
@@ -30,9 +29,9 @@ subtest 'list' => sub {
     is(ref($db_list), 'ARRAY', '/templates is an arrayref');
     
     my $db = $app->db_storage;
-    my $owner = $uuid_gen->create_str;
-    @templates = (  $db->create_template(name => $uuid_gen->create_str, owner => $owner),
-                    $db->create_template(name => $uuid_gen->create_str, owner => $owner),
+    my $owner = TestDbServer::PostgresInstance::unique_db_name();
+    @templates = (  $db->create_template(name => TestDbServer::PostgresInstance::unique_db_name(), owner => $owner),
+                    $db->create_template(name => TestDbServer::PostgresInstance::unique_db_name(), owner => $owner),
                 );
 
     $req = $t->get_ok('/templates')
@@ -109,7 +108,7 @@ subtest 'based on database' => sub {
     my $database_details = $create_database->tx->res->json;
     my $database_id = $database_details->{id};
 
-    my $template_name = $uuid_gen->create_str;
+    my $template_name = TestDbServer::PostgresInstance::unique_db_name();
     my $creation = $t->post_ok("/templates?based_on=${database_id}&name=${template_name}")
         ->status_is(201)
         ->header_like('Location' => qr(/templates/\w+), 'Location header');
