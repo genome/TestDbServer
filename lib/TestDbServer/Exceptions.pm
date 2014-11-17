@@ -44,11 +44,11 @@ use Exception::Class (
     },
 
     Exception::CannotCreateDatabase => {
-        isa => 'Exception::ShellCommandFailed',
+        isa => 'Exception::BaseException',
     },
 
     Exception::CannotDropDatabase => {
-        isa => 'Exception::ShellCommandFailed',
+        isa => 'Exception::BaseException',
     },
 
     Exception::CannotImportDatabase => {
