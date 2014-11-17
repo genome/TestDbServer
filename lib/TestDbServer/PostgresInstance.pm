@@ -2,7 +2,6 @@ use App::Info::RDBMS::PostgreSQL;
 use Data::UUID;
 
 use TestDbServer::Exceptions;
-use TestDbServer::CommandLineRunner;
 use DBI;
 
 package TestDbServer::PostgresInstance;
