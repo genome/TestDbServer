@@ -157,7 +157,7 @@ sub delete {
         });
     }
     catch {
-        if (ref($_) && $_->isa('Exception::TemplateNotFound') || $_->isa('Exception::CannotUnlinkFile')) {
+        if (ref($_) && $_->isa('Exception::TemplateNotFound')) {
             $self->app->log->error("template $id does not exist");
             $return_code = 404;
         } else {

@@ -17,27 +17,6 @@ use Exception::Class (
         isa => 'Exception::BaseException',
     },
 
-    Exception::CannotMakeDirectory => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::FileExists => {
-        description => 'File exists',
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::CannotOpenFile => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::CannotUnlinkFile => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
     Exception::ShellCommandFailed => {
         isa => 'Exception::BaseException',
         fields => [qw(exit_code signal core_dump output)],
@@ -49,10 +28,6 @@ use Exception::Class (
 
     Exception::CannotDropDatabase => {
         isa => 'Exception::BaseException',
-    },
-
-    Exception::CannotImportDatabase => {
-        isa => 'Exception::ShellCommandFailed',
     },
 
     Exception::DatabaseNotFound => {
@@ -97,20 +72,6 @@ sub _find_source_location {
     my $frame = $self->trace->next_frame;
 
     return $frame->filename . ': ' . $frame->line;
-}
-
-package Exception::ShellCommandFailed;
-
-sub throw {
-    my($class, %params) = @_;
-
-    # extract info from the passed-in error code
-    if (my $child_error = delete $params{child_error}) {
-        $params{exit_code} = $child_error >> 8;
-        $params{signal} = $child_error & 127;
-        $params{core_dump} = $child_error & 128;
-    }
-    $class->SUPER::throw(%params);
 }
 
 1;
