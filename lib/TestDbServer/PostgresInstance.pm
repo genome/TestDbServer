@@ -32,7 +32,7 @@ has 'superuser' => (
 has 'name' => (
     is => 'ro',
     isa => 'Str',
-    builder => '_build_name',
+    builder => 'unique_db_name',
 );
 {
     my $app_pg = App::Info::RDBMS::PostgreSQL->new();
@@ -62,7 +62,7 @@ sub createdb_from_template {
 }
 
 my $uuid_gen = Data::UUID->new();
-sub _build_name {
+sub unique_db_name {
     my $class = shift;
     my $hex = $uuid_gen->create_hex();
     $hex =~ s/^0x//;

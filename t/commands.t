@@ -46,7 +46,7 @@ subtest 'create template from database' => sub {
         $dbi->disconnect;
     }
 
-    my $new_template_name = $uuid_gen->create_str;
+    my $new_template_name = TestDbServer::PostgresInstance::unique_db_name();
 
     my $cmd = TestDbServer::Command::CreateTemplateFromDatabase->new(
                     name => $new_template_name,
