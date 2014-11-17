@@ -43,7 +43,6 @@ sub get_user_agent {
         $ua = LWP::UserAgent->new;
         $ua->agent("TestDbServer::CmdLine/0.1 ");
         $ua->timeout(5);
-        push @{ $ua->requests_redirectable }, 'POST';
     }
     return $ua;
 }
@@ -74,13 +73,19 @@ sub url_for {
 
 sub assert_success {
     my $rsp = shift;
+
     unless (ref($rsp) && $rsp->isa('HTTP::Response')) {
         Carp::croak("Expected an HTTP::Response instance, but got " . ref($rsp) || $rsp);
+    }
+
+    if ($rsp->is_redirect && $rsp->request->method eq 'POST') {
+        Carp::croak('redirect received when trying to create, are you sure your server URL is correct?');
     }
 
     unless ($rsp->is_success) {
         Carp::croak('Got error response '.$rsp->code . ': '. $rsp->message);
     }
+
     return 1;
 }
 
