@@ -6,6 +6,8 @@ use DBI;
 
 package TestDbServer::PostgresInstance;
 
+use TestDbServer::Types;
+
 use Moose;
 use namespace::autoclean;
 
@@ -26,7 +28,7 @@ has 'port' => (
 );
 has 'owner' => (
     is => 'ro',
-    isa => 'Str',
+    isa => 'pg_identifier',
     required => 1,
 );
 has 'superuser' => (
@@ -40,7 +42,7 @@ has 'superuser_passwd' => (
 );
 has 'name' => (
     is => 'ro',
-    isa => 'Str',
+    isa => 'pg_identifier',
     builder => 'unique_db_name',
 );
 has '_admin_dbh' => (
@@ -63,25 +65,15 @@ sub _build_admin_dbh {
                                { RaiseError => 1, PrintError => 1 });
 }
 
-sub _validate_identifier {
-    my $str = shift;
-
-    return $str =~ m/^\w+$/;
-}
-
 sub createdb_from_template {
     my($self, $template_name) = @_;
 
-    my $name = $self->name;
-    my $owner = $self->owner;
-    foreach ([ $name, 'database'], [ $owner, 'owner' ], [ $template_name, 'template name' ]) {
-        my($value, $name) = @$_;
-        unless (_validate_identifier($value)) {
-            Exception::InvalidParam->throw(name => $name, value => $value);
-        }
+    unless ($template_name =~ m/^\w+$/) {
+        Exception::InvalidParam->throw(name => 'template name', value => $template_name);
     }
 
     my $dbh = $self->_admin_dbh;
+    my($name, $owner) = map { $self->$_ } qw(name owner);
     try {
         my $rv = $dbh->do(qq(CREATE DATABASE "$name" WITH OWNER "$owner" TEMPLATE "$template_name"));
 
@@ -102,10 +94,6 @@ sub unique_db_name {
 
 sub dropdb {
     my $self = shift;
-
-    unless (_validate_identifier($self->name)) {
-        Exception::InvalidParam->throw(name => 'name', value => $self->name);
-    }
 
     my $dbh = $self->_admin_dbh;
     my $name = $self->name;

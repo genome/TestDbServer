@@ -11,7 +11,7 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 5;
+plan tests => 4;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
@@ -25,12 +25,11 @@ subtest 'create from template param validation' => sub {
     my $invalid_sql = q{'Robert'); DROP TABLE students; --};
     my %valid_params = ( host => $host, port => $port, owner => $owner, superuser => $superuser );
     foreach my $check_param ( qw( name owner ) ) {
-        my $pg = TestDbServer::PostgresInstance->new(
-                    %valid_params,
-                    $check_param => $invalid_sql,
-                );
-        throws_ok { $pg->createdb_from_template('template1') }
-                'Exception::InvalidParam',
+        throws_ok { TestDbServer::PostgresInstance->new(
+                        %valid_params,
+                        $check_param => $invalid_sql,
+                  ) }
+                qr(String has non-alphanumeric characters),
                 "Invalid parameter for $check_param throws exception";
     }
 
@@ -38,22 +37,6 @@ subtest 'create from template param validation' => sub {
     throws_ok { $pg->createdb_from_template($invalid_sql) }
             'Exception::InvalidParam',
             'Invalid parameter for template name throws exception';
-};
-
-subtest 'drop db param validation' => sub {
-    plan tests => 1;
-
-    my $invalid_sql = q{'Robert'); DROP TABLE students; --};
-    my $pg = TestDbServer::PostgresInstance->new(
-                name => $invalid_sql,
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser
-            );
-    throws_ok { $pg->createdb_from_template('template1') }
-            'Exception::InvalidParam',
-            "Invalid parameter for name throws exception";
 };
 
 subtest 'create connect delete' => sub {
