@@ -15,7 +15,6 @@ use FakeApp;
 use DBI;
 use Data::UUID;
 
-use TestDbServer::Command::SaveTemplateFile;
 use TestDbServer::Command::CreateTemplateFromDatabase;
 use TestDbServer::Command::CreateDatabaseFromTemplate;
 use TestDbServer::Command::DeleteTemplate;

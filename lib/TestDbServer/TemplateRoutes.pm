@@ -5,7 +5,6 @@ use Try::Tiny;
 use File::Basename;
 
 use TestDbServer::Utils;
-use TestDbServer::Command::SaveTemplateFile;
 use TestDbServer::Command::DeleteTemplate;
 use TestDbServer::Command::CreateTemplateFromDatabase;
 
