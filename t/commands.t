@@ -2,8 +2,6 @@ use Mojo::Base -strict;
 
 use Test::More;
 use Test::Exception;
-use Mojo::Upload;
-use Mojo::Asset::Memory;
 
 use File::Temp qw();
 
