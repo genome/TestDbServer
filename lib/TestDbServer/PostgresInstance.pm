@@ -3,11 +3,17 @@ use Data::UUID;
 
 use TestDbServer::Exceptions;
 use TestDbServer::CommandLineRunner;
+use DBI;
 
 package TestDbServer::PostgresInstance;
 
 use Moose;
 use namespace::autoclean;
+
+use Try::Tiny;
+
+use strict;
+use warnings;
 
 has 'host' => (
     is => 'ro',
@@ -29,35 +35,61 @@ has 'superuser' => (
     isa => 'Str',
     required => 1,
 );
+has 'superuser_passwd' => (
+    is => 'ro',
+    isa => 'Maybe[Str]',
+);
 has 'name' => (
     is => 'ro',
     isa => 'Str',
     builder => 'unique_db_name',
 );
+has '_admin_dbh' => (
+    is => 'ro',
+    isa => 'DBI::db',
+    builder => '_build_admin_dbh',
+    lazy => 1,
+);
+
 {
     my $app_pg = App::Info::RDBMS::PostgreSQL->new();
     sub app_pg { return $app_pg }
 }
 
+sub _build_admin_dbh {
+    my $self = shift;
+    my($host, $port, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'superuser', 'superuser_passwd' );
+    return DBI->connect_cached("dbi:Pg:dbname=template1;port=$port;host=$host",
+                               $user, $pass,
+                               { RaiseError => 1, PrintError => 1 });
+}
+
+sub _validate_identifier {
+    my $str = shift;
+
+    return $str =~ m/^\w+$/;
+}
+
 sub createdb_from_template {
     my($self, $template_name) = @_;
 
-    my $createdb = $self->app_pg->createdb;
-
-    my $runner = TestDbServer::CommandLineRunner->new(
-                        $createdb,
-                        '-h', $self->host,
-                        '-p', $self->port,
-                        '-U', $self->superuser,
-                        '-O', $self->owner,
-                        '-T', $template_name,
-                        $self->name,
-                    );
-    unless ($runner->rv) {
-        Exception::CannotCreateDatabase->throw(error => "$createdb failed",
-                                               output => $runner->output,
-                                               child_error => $runner->child_error);
+    my $name = $self->name;
+    my $owner = $self->owner;
+    foreach ([ $name, 'database'], [ $owner, 'owner' ], [ $template_name, 'template name' ]) {
+        my($value, $name) = @$_;
+        unless (_validate_identifier($value)) {
+            Exception::InvalidParam->throw(name => $name, value => $value);
+        }
     }
+
+    my $dbh = $self->_admin_dbh;
+    try {
+        my $rv = $dbh->do(qq(CREATE DATABASE "$name" WITH OWNER "$owner" TEMPLATE "$template_name"));
+
+    } catch {
+        Exception::CannotCreateDatabase->throw(error => $_);
+    };
+
     return 1;
 }
 
@@ -71,25 +103,20 @@ sub unique_db_name {
 
 sub dropdb {
     my $self = shift;
-    my $dropdb = $self->app_pg->dropdb;
 
-    my $host = $self->host;
-    my $port = $self->port;
-    my $superuser = $self->superuser;
-    my $name = $self->name;
-
-    my $runner = TestDbServer::CommandLineRunner->new(
-                        $dropdb,
-                        '-h', $host,
-                        '-p', $port,
-                        '-U', $superuser,
-                        $name
-                    );
-    unless ($runner->rv) {
-        Exception::CannotDropDatabase->throw(error => "$dropdb failed",
-                                             output => $runner->output,
-                                             child_error => $runner->child_error);
+    unless (_validate_identifier($self->name)) {
+        Exception::InvalidParam->throw(name => 'name', value => $self->name);
     }
+
+    my $dbh = $self->_admin_dbh;
+    my $name = $self->name;
+    try {
+        $dbh->do(qq(DROP DATABASE "$name"));
+
+    } catch {
+        Exception::CannotDropDatabase->throw(error => $_);
+    };
+
     return 1;
 }
 

@@ -7,6 +7,12 @@ use Exception::Class (
         fields => ['params'],
     },
 
+    Exception::InvalidParam => {
+        isa => 'Exception::BaseException',
+        description => 'Parameter value is invalid',
+        fields => ['name', 'value'],
+    },
+
     Exception::NotInitialized => {
         isa => 'Exception::BaseException',
     },

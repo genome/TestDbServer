@@ -11,13 +11,50 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 2;
+plan tests => 5;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
 my $port = $config->db_port;
 my $superuser = $config->db_user;
 my $owner = $config->test_db_owner;
+
+subtest 'create from template param validation' => sub {
+    plan tests => 3;
+
+    my $invalid_sql = q{'Robert'); DROP TABLE students; --};
+    my %valid_params = ( host => $host, port => $port, owner => $owner, superuser => $superuser );
+    foreach my $check_param ( qw( name owner ) ) {
+        my $pg = TestDbServer::PostgresInstance->new(
+                    %valid_params,
+                    $check_param => $invalid_sql,
+                );
+        throws_ok { $pg->createdb_from_template('template1') }
+                'Exception::InvalidParam',
+                "Invalid parameter for $check_param throws exception";
+    }
+
+    my $pg = TestDbServer::PostgresInstance->new( %valid_params );
+    throws_ok { $pg->createdb_from_template($invalid_sql) }
+            'Exception::InvalidParam',
+            'Invalid parameter for template name throws exception';
+};
+
+subtest 'drop db param validation' => sub {
+    plan tests => 1;
+
+    my $invalid_sql = q{'Robert'); DROP TABLE students; --};
+    my $pg = TestDbServer::PostgresInstance->new(
+                name => $invalid_sql,
+                host => $host,
+                port => $port,
+                owner => $owner,
+                superuser => $superuser
+            );
+    throws_ok { $pg->createdb_from_template('template1') }
+            'Exception::InvalidParam',
+            "Invalid parameter for name throws exception";
+};
 
 subtest 'create connect delete' => sub {
     plan tests => 6;
@@ -77,6 +114,29 @@ subtest 'create db from template' => sub {
     $dbh->disconnect();
     ok($original_pg->dropdb(), 'drop original database');
     ok($copy_pg->dropdb(), 'drop copy database');
+};
+
+subtest 'create duplicate database' => sub {
+    plan tests => 2;
+
+    my $original_pg = TestDbServer::PostgresInstance->new(
+                host => $host,
+                port => $port,
+                owner => $owner,
+                superuser => $superuser,
+            );
+    ok($original_pg->createdb_from_template('template1'), 'Create original DB');
+
+    my $copy_pg = TestDbServer::PostgresInstance->new(
+                host => $host,
+                port => $port,
+                owner => $owner,
+                superuser => $superuser,
+                name => $original_pg->name,
+            );
+    throws_ok { $copy_pg->createdb_from_template('template1') }
+            'Exception::CannotCreateDatabase',
+            'Creating a database with duplicate name throws exception';
 };
 
 sub connect_to_db {
