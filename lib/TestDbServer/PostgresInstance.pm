@@ -1,4 +1,3 @@
-use App::Info::RDBMS::PostgreSQL;
 use Data::UUID;
 
 use TestDbServer::Exceptions;
@@ -51,11 +50,6 @@ has '_admin_dbh' => (
     builder => '_build_admin_dbh',
     lazy => 1,
 );
-
-{
-    my $app_pg = App::Info::RDBMS::PostgreSQL->new();
-    sub app_pg { return $app_pg }
-}
 
 sub _build_admin_dbh {
     my $self = shift;

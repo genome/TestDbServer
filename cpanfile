@@ -1,6 +1,5 @@
 requires 'perl', 'v5.10';
 
-requires 'App::Info::RDBMS::PostgreSQL';
 requires 'App::Sqitch';
 requires 'Carp';
 requires 'Data::UUID';
@@ -8,7 +7,6 @@ requires 'DBD::Pg';
 requires 'DBI', '1.63';
 requires 'DBIx::Class';
 requires 'Exception::Class';
-requires 'IPC::Run';
 requires 'Mojolicious', '5';
 requires 'Moose', '2.1';
 requires 'MooseX::NonMoose';
