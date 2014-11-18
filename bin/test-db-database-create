@@ -18,7 +18,7 @@ my $rsp = $ua->request($req);
 assert_success $rsp;
 
 my $new_db = decode_json($rsp->content);
-print "CREATED ",$new_db->{name},"\n";
+printf("CREATED %s at %s:%s\n", @$new_db{'name','host','port'});
 exit 0;
 
 sub make_post_options {
