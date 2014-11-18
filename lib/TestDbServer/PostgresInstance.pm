@@ -115,6 +115,13 @@ sub is_valid_role {
     return $row->[0];
 }
 
+sub grant_role_to_role {
+    my($self, $source, $target) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    $dbh->do(sprintf('GRANT %s to %s', $source, $target));
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;

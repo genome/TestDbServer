@@ -61,13 +61,12 @@ sub execute {
 sub grant_role_to_superuser {
     my ($self, $pg, $source) = @_;
 
-    my $dbh = $self->schema->storage->dbh();
     for my $role_name ($source, $self->superuser) {
         unless ($pg->is_valid_role($role_name)) {
             Exception::RoleNotFound->throw(role_name => $role_name);
         }
     }
-    $dbh->do(sprintf('GRANT %s to %s', $source, $self->superuser));
+    $pg->grant_role_to_role($source, $self->superuser);
 }
 
 __PACKAGE__->meta->make_immutable;
