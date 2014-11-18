@@ -6,7 +6,7 @@ use Getopt::Long;
 use JSON qw(decode_json);
 
 my $opts = {};
-GetOptions($opts, 'owner=s', 'based-on=s','short-help','help');
+GetOptions($opts, 'owner=s', 'based-on=s','bash','short-help','help');
 
 print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
@@ -18,7 +18,14 @@ my $rsp = $ua->request($req);
 assert_success $rsp;
 
 my $new_db = decode_json($rsp->content);
-printf("CREATED %s at %s:%s\n", @$new_db{'name','host','port'});
+
+my $output_format;
+if ($opts->{bash}) {
+    $output_format = 'TESTDBSERVER_DB_NAME=%s TESTDBSERVER_DB_HOST=%s TESTDBSERVER_DB_PORT=%s';
+} else {
+    $output_format = "CREATED %s at %s:%s\n";
+}
+printf($output_format, @$new_db{'name','host','port'});
 exit 0;
 
 sub make_post_options {
@@ -52,7 +59,7 @@ sub print_short_help {
 
 sub print_help {
     print <<"EOS";
-Usage: $0 [--owner <owner>] [--based-on <template>]
+Usage: $0 [--owner <owner>] [--based-on <template>] [--bash]
 
 Create a new test database.  You must specify either --owner or --based-on,
 but not both.
@@ -61,6 +68,10 @@ If run with --owner, it creates a new, empty test database with the given
 owner.  This owner must already exist as a role on the database server.
 
 If run with --based-on, it creates a test database using the named template.
+
+The --bash option changes the output to be a short, bash-compatible script
+that will set the shell variables TESTDBSERVER_DB_NAME, TESTDBSERVER_DB_HOST
+and TESTDBSERVER_DB_PORT to the name, host and port of the created database.
 EOS
     exit;
 }
