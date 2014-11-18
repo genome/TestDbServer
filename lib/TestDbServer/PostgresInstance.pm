@@ -68,7 +68,7 @@ sub _build_admin_dbh {
 sub createdb_from_template {
     my($self, $template_name) = @_;
 
-    unless ($template_name =~ m/^\w+$/) {
+    unless ($self->is_valid_database($template_name)) {
         Exception::InvalidParam->throw(name => 'template name', value => $template_name);
     }
 
@@ -120,6 +120,14 @@ sub grant_role_to_role {
 
     my $dbh = $self->_admin_dbh;
     $dbh->do(sprintf('GRANT %s to %s', $source, $target));
+}
+
+sub is_valid_database {
+    my($self, $db_name) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    my $row = $dbh->selectrow_arrayref('SELECT 1 FROM pg_catalog.pg_database WHERE datname = ?', undef, $db_name);
+    return $row->[0];
 }
 
 __PACKAGE__->meta->make_immutable;

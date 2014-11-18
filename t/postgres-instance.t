@@ -11,7 +11,7 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 5;
+plan tests => 6;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
@@ -108,6 +108,19 @@ subtest 'is_valid_role' => sub {
     my $pg = create_pg_object_from_config();
     ok($pg->is_valid_role($config->db_user), 'valid role');
     ok(! $pg->is_valid_role('garbage'), 'invalid role');
+};
+
+subtest 'is_valid_database' => sub {
+    plan tests => 5;
+
+    my $pg = create_pg_object_from_config();
+    ok(! $pg->is_valid_database($pg->name), 'database does not exist yet');
+
+    ok($pg->createdb_from_template('template1'), 'create database');
+    ok($pg->is_valid_database($pg->name), 'database exists now');
+
+    ok($pg->dropdb, 'delete database');
+    ok(! $pg->is_valid_database($pg->name), 'database does not exist now');
 };
 
 sub connect_to_db {
