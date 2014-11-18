@@ -42,12 +42,7 @@ subtest 'create from template param validation' => sub {
 subtest 'create connect delete' => sub {
     plan tests => 6;
 
-    my $pg = TestDbServer::PostgresInstance->new(
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser,
-            );
+    my $pg = create_pg_object_from_config();
     ok($pg, 'Created new PostgresInstance');
     ok($pg->name, 'has a name: '. $pg->name);
 
@@ -63,12 +58,7 @@ subtest 'create connect delete' => sub {
 subtest 'create db from template' => sub {
     plan tests => 5;
 
-    my $original_pg = TestDbServer::PostgresInstance->new(
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser,
-            );
+    my $original_pg = create_pg_object_from_config();
     ok($original_pg->createdb_from_template('template1'), 'Create original DB');
     {
         my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
@@ -79,12 +69,7 @@ subtest 'create db from template' => sub {
     }
 
 
-    my $copy_pg = TestDbServer::PostgresInstance->new(
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser,
-            );
+    my $copy_pg = create_pg_object_from_config();
     ok($copy_pg->createdb_from_template($original_pg->name), 'Create database from template');
 
     my $dbh = connect_to_db($copy_pg->name);
@@ -102,12 +87,7 @@ subtest 'create db from template' => sub {
 subtest 'create duplicate database' => sub {
     plan tests => 2;
 
-    my $original_pg = TestDbServer::PostgresInstance->new(
-                host => $host,
-                port => $port,
-                owner => $owner,
-                superuser => $superuser,
-            );
+    my $original_pg = create_pg_object_from_config();
     ok($original_pg->createdb_from_template('template1'), 'Create original DB');
 
     my $copy_pg = TestDbServer::PostgresInstance->new(
@@ -133,4 +113,13 @@ subtest 'is_valid_role' => sub {
 sub connect_to_db {
     my $db_name = shift;
     DBI->connect("dbi:Pg:dbname=$db_name;host=$host;port=$port", $owner, '', { PrintError => 0 });
+}
+
+sub create_pg_object_from_config {
+    return TestDbServer::PostgresInstance->new(
+                host => $host,
+                port => $port,
+                owner => $owner,
+                superuser => $superuser,
+            );
 }
