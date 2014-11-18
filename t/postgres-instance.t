@@ -11,7 +11,7 @@ use TestDbServer::PostgresInstance;
 use strict;
 use warnings;
 
-plan tests => 4;
+plan tests => 5;
 
 my $config = TestDbServer::Configuration->new_from_path();
 my $host = $config->db_host;
@@ -120,6 +120,14 @@ subtest 'create duplicate database' => sub {
     throws_ok { $copy_pg->createdb_from_template('template1') }
             'Exception::CannotCreateDatabase',
             'Creating a database with duplicate name throws exception';
+};
+
+subtest 'is_valid_role' => sub {
+    plan tests => 2;
+
+    my $pg = create_pg_object_from_config();
+    ok($pg->is_valid_role($config->db_user), 'valid role');
+    ok(! $pg->is_valid_role('garbage'), 'invalid role');
 };
 
 sub connect_to_db {

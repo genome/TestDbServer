@@ -107,6 +107,14 @@ sub dropdb {
     return 1;
 }
 
+sub is_valid_role {
+    my($self, $role_name) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    my $row = $dbh->selectrow_arrayref(q(SELECT 1 FROM pg_roles WHERE rolname=?), undef, $role_name);
+    return $row->[0];
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;
