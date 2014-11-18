@@ -32,8 +32,8 @@ subtest 'list' => sub {
 
     my $db = $app->db_storage;
     my $owner = $uuid_gen->create_str;
-    @databases = ( $db->create_database( host => 'foo', port => '123', name => $uuid_gen->create_str, owner => $owner ),
-                   $db->create_database( host => 'bar', port => '456', name => $uuid_gen->create_str, owner => $owner ),
+    @databases = ( $db->create_database( name => $uuid_gen->create_str, owner => $owner ),
+                   $db->create_database( name => $uuid_gen->create_str, owner => $owner ),
                 );
     $r = $t->get_ok('/databases')
       ->status_is(200);
@@ -53,7 +53,7 @@ subtest 'search' => sub {
         ->status_is(200)
         ->json_is([ map { $_->database_id } @databases ]);
 
-    $t->get_ok('/databases?host=garbage')
+    $t->get_ok('/databases?name=garbage')
         ->status_is(200)
         ->json_is([]);
 
@@ -64,11 +64,14 @@ subtest 'search' => sub {
 subtest 'get' => sub {
     plan tests => 14;
 
+    my $expected_host = $t->app->configuration->db_host;
+    my $expected_port = $t->app->configuration->db_port;
+
     $t->get_ok('/databases/'.$databases[0]->database_id)
         ->status_is(200)
         ->json_is('/id' => $databases[0]->database_id)
-        ->json_is('/host' => 'foo')
-        ->json_is('/port' => '123' )
+        ->json_is('/host', $expected_host)
+        ->json_is('/port', $expected_port)
         ->json_is('/name' => $databases[0]->name)
         ->json_is('/owner' => $databases[0]->owner)
         ->json_is('/template_id' => undef)

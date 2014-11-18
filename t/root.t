@@ -37,9 +37,7 @@ subtest 'root with one template and one database' => sub {
                                             name => $uuid_gen->create_str,
                                             owner => 'bubba',
                                         );
-    my $database = $storage->create_database(host => 'localhost',
-                                             port => 123,
-                                             name => $uuid_gen->create_str,
+    my $database = $storage->create_database(name => $uuid_gen->create_str,
                                              owner => 'bubba',
                                              template_id => $template->template_id);
     my $r = $t->get_ok('/')

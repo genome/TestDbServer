@@ -69,7 +69,7 @@ sub get {
 
     if ($database) {
         $self->app->log->info("found database $id");
-        $self->render(json => _hashref_for_database_obj($database));
+        $self->render(json => $self->_hashref_for_database_obj($database));
 
     } elsif ($error) {
         $self->app->log->error("Cannot get database $id");
@@ -87,6 +87,8 @@ sub _remove_expired_databases {
     my $schema = $self->app->db_storage;
 
     my $database_set = $schema->search_expired_databases();
+    my($host,$port) = $self->app->host_and_port_for_created_database();
+
     while (my $database = $database_set->next()) {
         try {
             $schema->txn_do(sub {
@@ -95,6 +97,8 @@ sub _remove_expired_databases {
                                 schema => $schema,
                                 database_id => $database->database_id,
                                 superuser => $self->app->configuration->db_user,
+                                host => $host,
+                                port => $port,
                             );
                 $cmd->execute();
             });
@@ -106,11 +110,13 @@ sub _remove_expired_databases {
 }
 
 sub _hashref_for_database_obj {
-    my $database = shift;
+    my($self, $database) = @_;
 
     my %h;
-    @h{'id','host','port','name','owner','created','expires','template_id'}
-        = map { $database->$_ } qw( database_id host port name owner create_time expire_time template_id );
+    @h{'id','name','owner','created','expires','template_id'}
+        = map { $database->$_ } qw( database_id name owner create_time expire_time template_id );
+    @h{'host','port'} = $self->app->host_and_port_for_created_database();
+
     return \%h;
 }
 
@@ -175,7 +181,7 @@ sub _create_database_common {
         my $response_location = TestDbServer::Utils::id_url_for_request_and_entity_id($self->req, $database->database_id);
         $self->res->headers->location($response_location);
 
-        $self->render(status => 201, json => _hashref_for_database_obj($database));
+        $self->render(status => 201, json => $self->_hashref_for_database_obj($database));
 
     } else {
         $self->rendered($return_code);
@@ -191,10 +197,13 @@ sub delete {
     my $schema = $self->app->db_storage;
     my $return_code;
     try {
+        my($host, $port) = $self->app->host_and_port_for_created_database();
         my $cmd = TestDbServer::Command::DeleteDatabase->new(
                         database_id => $id,
                         schema => $schema,
                         superuser => $self->app->configuration->db_user,
+                        host => $host,
+                        port => $port,
                     );
         $schema->txn_do(sub {
             $cmd->execute();
@@ -263,7 +272,7 @@ sub patch {
         my $response_location = TestDbServer::Utils::id_url_for_request_and_entity_id($self->req, $database->database_id);
         $self->res->headers->location($response_location);
 
-        $self->render(status => 200, json => _hashref_for_database_obj($database));
+        $self->render(status => 200, json => $self->_hashref_for_database_obj($database));
 
     } else {
         $self->rendered($return_code);

@@ -60,14 +60,14 @@ subtest save_template => sub {
 
 my @databases;
 subtest save_database => sub {
-    plan tests => 11;
+    plan tests => 9;
 
     my @database_info = (
-        { host => 'localhost', port => 123, name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
-        { host => 'localhost', port => 123, name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
-        { host => 'other', port => 123, name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
-        { host => 'localhost', port => 456, name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
-        { host => 'other', port => 999, name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[1]->template_id },
+        { name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
+        { name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
+        { name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
+        { name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[0]->template_id },
+        { name => $uuid_gen->create_str, owner => 'bubba', template_id => $templates[1]->template_id },
     );
 
     for (my $i = 0; $i < @database_info; $i++) {
@@ -78,10 +78,10 @@ subtest save_database => sub {
 
     check_required_attributes_for_save(
         sub { $schema->create_database(@_) },
-        { host => 'localhost', port => 123, name => 'joe', owner => 'bubba' }
+        { name => 'joe', owner => 'bubba' }
     );
 
-    throws_ok { $schema->create_database(template_id => 'garbage', host => 'h', port => 1, name => 'n', owner => 'o') }
+    throws_ok { $schema->create_database(template_id => 'garbage', name => 'n', owner => 'o') }
         'DBIx::Class::Exception',
         'Cannot insert database that is not linked to a template';
 

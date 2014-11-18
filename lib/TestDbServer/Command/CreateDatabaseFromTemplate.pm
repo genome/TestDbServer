@@ -46,8 +46,6 @@ sub execute {
 
     my $database = $self->schema->create_database(
                         name => $pg->name,
-                        host => $self->host,
-                        port => $self->port,
                         owner => $pg->owner,
                         template_id => $template->template_id,
                     );
