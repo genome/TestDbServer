@@ -8,13 +8,15 @@ use LWP;
 use Carp;
 use URI::Escape qw(uri_escape);
 use JSON qw(decode_json);
+use Getopt::Long qw();
 
 use strict;
 use warnings;
 
 use Exporter 'import';
 our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name database_id_from_name
-                    get_template_name_from_id get_database_name_from_id foreach_database_or_template);
+                    get_template_name_from_id get_database_name_from_id foreach_database_or_template
+                    parse_opts);
 
 sub find_available_sub_command_paths {
     my($cmd) = shift;
@@ -136,5 +138,17 @@ sub foreach_database_or_template {
     }
     return $count || '0 but true';
 }
+
+sub parse_opts {
+    my @desc = @_;
+    my $opts = {};
+    my $opts_parser = Getopt::Long::Parser->new();
+    my $ok = $opts_parser->getoptions($opts, @desc);
+    unless ($ok) {
+        exit 1;
+    }
+    return $opts;
+}
+
 
 1;
