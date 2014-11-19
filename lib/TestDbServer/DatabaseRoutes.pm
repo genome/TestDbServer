@@ -164,9 +164,7 @@ sub _create_database_common {
         });
     }
     catch {
-        if (ref($_)
-                && ( $_->isa('Exception::TemplateNotFound') || $_->isa('Exception::CannotOpenFile'))
-        ) {
+        if (ref($_) && $_->isa('Exception::TemplateNotFound')) {
             $self->app->log->error('template not found');
             $return_code = 404;
 

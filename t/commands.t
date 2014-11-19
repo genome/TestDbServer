@@ -2,8 +2,6 @@ use Mojo::Base -strict;
 
 use Test::More;
 use Test::Exception;
-use Mojo::Upload;
-use Mojo::Asset::Memory;
 
 use File::Temp qw();
 
@@ -15,7 +13,6 @@ use FakeApp;
 use DBI;
 use Data::UUID;
 
-use TestDbServer::Command::SaveTemplateFile;
 use TestDbServer::Command::CreateTemplateFromDatabase;
 use TestDbServer::Command::CreateDatabaseFromTemplate;
 use TestDbServer::Command::DeleteTemplate;
@@ -46,7 +43,7 @@ subtest 'create template from database' => sub {
         $dbi->disconnect;
     }
 
-    my $new_template_name = $uuid_gen->create_str;
+    my $new_template_name = TestDbServer::PostgresInstance::unique_db_name();
 
     my $cmd = TestDbServer::Command::CreateTemplateFromDatabase->new(
                     name => $new_template_name,
@@ -350,7 +347,7 @@ sub new_pg_instance {
             owner => $config->test_db_owner,
             superuser => $config->db_user,
         );
-    $pg->createdb();
+    $pg->createdb_from_template('template1');
     return $pg;
 }
 

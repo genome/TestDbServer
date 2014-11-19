@@ -7,29 +7,14 @@ use Exception::Class (
         fields => ['params'],
     },
 
+    Exception::InvalidParam => {
+        isa => 'Exception::BaseException',
+        description => 'Parameter value is invalid',
+        fields => ['name', 'value'],
+    },
+
     Exception::NotInitialized => {
         isa => 'Exception::BaseException',
-    },
-
-    Exception::CannotMakeDirectory => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::FileExists => {
-        description => 'File exists',
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::CannotOpenFile => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
-    },
-
-    Exception::CannotUnlinkFile => {
-        isa => 'Exception::BaseException',
-        fields => ['path'],
     },
 
     Exception::ShellCommandFailed => {
@@ -38,15 +23,11 @@ use Exception::Class (
     },
 
     Exception::CannotCreateDatabase => {
-        isa => 'Exception::ShellCommandFailed',
+        isa => 'Exception::BaseException',
     },
 
     Exception::CannotDropDatabase => {
-        isa => 'Exception::ShellCommandFailed',
-    },
-
-    Exception::CannotImportDatabase => {
-        isa => 'Exception::ShellCommandFailed',
+        isa => 'Exception::BaseException',
     },
 
     Exception::DatabaseNotFound => {
@@ -91,20 +72,6 @@ sub _find_source_location {
     my $frame = $self->trace->next_frame;
 
     return $frame->filename . ': ' . $frame->line;
-}
-
-package Exception::ShellCommandFailed;
-
-sub throw {
-    my($class, %params) = @_;
-
-    # extract info from the passed-in error code
-    if (my $child_error = delete $params{child_error}) {
-        $params{exit_code} = $child_error >> 8;
-        $params{signal} = $child_error & 127;
-        $params{core_dump} = $child_error & 128;
-    }
-    $class->SUPER::throw(%params);
 }
 
 1;

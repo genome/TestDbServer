@@ -1,13 +1,19 @@
-use App::Info::RDBMS::PostgreSQL;
 use Data::UUID;
 
 use TestDbServer::Exceptions;
-use TestDbServer::CommandLineRunner;
+use DBI;
 
 package TestDbServer::PostgresInstance;
 
+use TestDbServer::Types;
+
 use Moose;
 use namespace::autoclean;
+
+use Try::Tiny;
+
+use strict;
+use warnings;
 
 has 'host' => (
     is => 'ro',
@@ -21,7 +27,7 @@ has 'port' => (
 );
 has 'owner' => (
     is => 'ro',
-    isa => 'Str',
+    isa => 'pg_identifier',
     required => 1,
 );
 has 'superuser' => (
@@ -29,55 +35,51 @@ has 'superuser' => (
     isa => 'Str',
     required => 1,
 );
+has 'superuser_passwd' => (
+    is => 'ro',
+    isa => 'Maybe[Str]',
+);
 has 'name' => (
     is => 'ro',
-    isa => 'Str',
-    builder => '_build_name',
+    isa => 'pg_identifier',
+    builder => 'unique_db_name',
 );
-{
-    my $app_pg = App::Info::RDBMS::PostgreSQL->new();
-    sub app_pg { return $app_pg }
-}
+has '_admin_dbh' => (
+    is => 'ro',
+    isa => 'DBI::db',
+    builder => '_build_admin_dbh',
+    lazy => 1,
+);
 
-sub createdb {
+sub _build_admin_dbh {
     my $self = shift;
-
-    return $self->_createdb_common();
+    my($host, $port, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'superuser', 'superuser_passwd' );
+    return DBI->connect_cached("dbi:Pg:dbname=template1;port=$port;host=$host",
+                               $user, $pass,
+                               { RaiseError => 1, PrintError => 0 });
 }
-
-sub _createdb_common {
-    my $self = shift;
-
-    my $createdb = $self->app_pg->createdb;
-
-    my $runner = TestDbServer::CommandLineRunner->new(
-                        $createdb,
-                        '-h', $self->host,
-                        '-p', $self->port,
-                        '-U', $self->superuser,
-                        '-O', $self->owner,
-                        @_,
-                        $self->name,
-                    );
-    unless ($runner->rv) {
-        Exception::CannotCreateDatabase->throw(error => "$createdb failed",
-                                               output => $runner->output,
-                                               child_error => $runner->child_error);
-    }
-    return 1;
-}
-
 
 sub createdb_from_template {
     my($self, $template_name) = @_;
 
-    return $self->_createdb_common(
-                '-T', $template_name,
-            );
+    unless ($self->is_valid_database($template_name)) {
+        Exception::InvalidParam->throw(name => 'template name', value => $template_name);
+    }
+
+    my $dbh = $self->_admin_dbh;
+    my($name, $owner) = map { $self->$_ } qw(name owner);
+    try {
+        my $rv = $dbh->do(qq(CREATE DATABASE "$name" WITH OWNER "$owner" TEMPLATE "$template_name"));
+
+    } catch {
+        Exception::CannotCreateDatabase->throw(error => $_);
+    };
+
+    return 1;
 }
 
 my $uuid_gen = Data::UUID->new();
-sub _build_name {
+sub unique_db_name {
     my $class = shift;
     my $hex = $uuid_gen->create_hex();
     $hex =~ s/^0x//;
@@ -86,26 +88,40 @@ sub _build_name {
 
 sub dropdb {
     my $self = shift;
-    my $dropdb = $self->app_pg->dropdb;
 
-    my $host = $self->host;
-    my $port = $self->port;
-    my $superuser = $self->superuser;
+    my $dbh = $self->_admin_dbh;
     my $name = $self->name;
+    try {
+        $dbh->do(qq(DROP DATABASE "$name"));
 
-    my $runner = TestDbServer::CommandLineRunner->new(
-                        $dropdb,
-                        '-h', $host,
-                        '-p', $port,
-                        '-U', $superuser,
-                        $name
-                    );
-    unless ($runner->rv) {
-        Exception::CannotDropDatabase->throw(error => "$dropdb failed",
-                                             output => $runner->output,
-                                             child_error => $runner->child_error);
-    }
+    } catch {
+        Exception::CannotDropDatabase->throw(error => $_);
+    };
+
     return 1;
+}
+
+sub is_valid_role {
+    my($self, $role_name) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    my $row = $dbh->selectrow_arrayref(q(SELECT 1 FROM pg_roles WHERE rolname=?), undef, $role_name);
+    return $row->[0];
+}
+
+sub grant_role_to_role {
+    my($self, $source, $target) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    $dbh->do(sprintf('GRANT %s to %s', $source, $target));
+}
+
+sub is_valid_database {
+    my($self, $db_name) = @_;
+
+    my $dbh = $self->_admin_dbh;
+    my $row = $dbh->selectrow_arrayref('SELECT 1 FROM pg_catalog.pg_database WHERE datname = ?', undef, $db_name);
+    return $row->[0];
 }
 
 __PACKAGE__->meta->make_immutable;

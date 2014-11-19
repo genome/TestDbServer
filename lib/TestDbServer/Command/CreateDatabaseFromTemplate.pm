@@ -39,7 +39,7 @@ sub execute {
                     );
 
     if ($owner ne $self->superuser) {
-        $self->grant_role_to_superuser($owner);
+        $self->grant_role_to_superuser($pg, $owner);
     }
 
     $pg->createdb_from_template($template->name);
@@ -57,19 +57,14 @@ sub execute {
 }
 
 sub grant_role_to_superuser {
-    my ($self, $source) = @_;
+    my ($self, $pg, $source) = @_;
 
-    my $dbh = $self->schema->storage->dbh();
-    my $is_valid_role = sub {
-        my $row = $dbh->selectrow_arrayref(q(SELECT 1 FROM pg_roles WHERE rolname=?), undef, @_);
-        return $row->[0];
-    };
     for my $role_name ($source, $self->superuser) {
-        unless ($is_valid_role->($role_name)) {
+        unless ($pg->is_valid_role($role_name)) {
             Exception::RoleNotFound->throw(role_name => $role_name);
         }
     }
-    $dbh->do(sprintf('GRANT %s to %s', $source, $self->superuser));
+    $pg->grant_role_to_role($source, $self->superuser);
 }
 
 __PACKAGE__->meta->make_immutable;
