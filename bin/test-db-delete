@@ -1,15 +1,13 @@
 #!/usr/bin/env perl
 
-use TestDbServer::CmdLine qw(get_user_agent url_for assert_success);
+use TestDbServer::CmdLine qw(get_user_agent url_for assert_success parse_opts);
 use LWP;
 use JSON qw(decode_json);
-use Getopt::Long;
 
 use strict;
 use warnings;
 
-my $opts = {};
-GetOptions($opts, 'short-help', 'help');
+my $opts = parse_opts('short-help', 'help');
 print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
