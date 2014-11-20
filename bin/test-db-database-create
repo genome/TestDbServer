@@ -28,10 +28,12 @@ exit 0;
 sub make_post_options {
     my $opts = shift;
     my @options;
+
     if ($opts->{owner}) {
         @options = ( owner => $opts->{owner} );
+    }
 
-    } else {
+    if ($opts->{'based-on'}) {
         my $req = HTTP::Request->new(GET => url_for('templates', [ name => $opts->{'based-on'} ]));
         my $rsp = $ua->request($req);
         assert_success $rsp;
@@ -46,6 +48,7 @@ sub make_post_options {
         }
         @options = ( 'based_on' => $ids->[0] );
     }
+
     return @options;
 }
 
