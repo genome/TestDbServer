@@ -145,7 +145,7 @@ sub parse_opts {
     my $opts_parser = Getopt::Long::Parser->new();
     my $ok = $opts_parser->getoptions($opts, @desc);
     unless ($ok) {
-        exit 1;
+        exit 9;
     }
     return $opts;
 }
