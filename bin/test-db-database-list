@@ -33,5 +33,5 @@ sub print_database_info {
 }
 
 sub print_short_help {
-    print "list databases";
+    print "list databases\n";
 }
