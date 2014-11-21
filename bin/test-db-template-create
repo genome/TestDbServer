@@ -8,7 +8,7 @@ use LWP;
 use HTTP::Request::Common qw(POST);
 use JSON qw(decode_json);
 
-my $opts = parse_opts('note=s', 'short-help', 'help');
+my $opts = parse_opts('timeout=i', 'note=s', 'short-help', 'help');
 print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
@@ -17,9 +17,9 @@ my ($name, $db_name) = @ARGV;
 # validate name
 # validate db_name
 
-my $db_id = db_name_to_id($db_name);
+my $db_id = db_name_to_id($db_name, $opts->{timeout});
 
-my $ua = get_user_agent();
+my $ua = get_user_agent($opts->{timeout});
 
 my @payload = map { $_ => $opts->{$_} }
               grep { exists $opts->{$_} }
@@ -39,8 +39,9 @@ exit 0;
 
 sub db_name_to_id {
     my $db_name = shift;
+    my $timeout = shift;
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($timeout);
     my $req = HTTP::Request->new(GET => url_for('databases', [ name => $db_name ]));
     my $rsp = $ua->request($req);
     assert_success $rsp;
