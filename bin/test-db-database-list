@@ -5,26 +5,31 @@ use warnings;
 
 use TestDbServer::CmdLine qw(parse_opts get_template_name_from_id foreach_database_or_template);
 
-my $opts = parse_opts('short-help', 'help');
+my $opts = parse_opts('timeout=i', 'short-help', 'help');
 if ($opts->{'short-help'} || $opts->{help}) {
     print_short_help();
     exit 0;
 }
 
-foreach_database_or_template('databases', \&print_database_info);
+my $cb = print_database_info($opts->{timeout});
+foreach_database_or_template('databases', $cb, $opts->{timeout});
 
 sub print_database_info {
-    my $database = shift;
+    my $timeout = shift;
 
-    my $template_name = get_template_name_from_id($database->{template_id});
-    unless (defined $template_name) {
-        $template_name = '<none>';
-    }
+    return sub {
+        my $database = shift;
 
-    print join("\t", $database->{name},
-                     "tmpl: $template_name",
-                     'expires: ' . $database->{expires}),
-            "\n";
+        my $template_name = get_template_name_from_id($database->{template_id}, $timeout);
+        unless (defined $template_name) {
+            $template_name = '<none>';
+        }
+
+        print join("\t", $database->{name},
+                         "tmpl: $template_name",
+                         'expires: ' . $database->{expires}),
+                "\n";
+    };
 }
 
 sub print_short_help {
