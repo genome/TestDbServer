@@ -119,9 +119,9 @@ sub _get_type_name_from_id {
 }
 
 sub foreach_database_or_template {
-    my($type, $cb) = @_;
+    my($type, $cb, $timeout) = @_;
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($timeout);
 
     my $req = HTTP::Request->new(GET => url_for($type));
     my $rsp = $ua->request($req);
