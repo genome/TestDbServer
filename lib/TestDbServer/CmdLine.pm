@@ -93,21 +93,21 @@ sub assert_success {
 }
 
 sub get_template_name_from_id {
-    my($template_id) = @_;
-    return _get_type_name_from_id('templates', $template_id);
+    my($template_id, $timeout) = @_;
+    return _get_type_name_from_id('templates', $template_id, $timeout);
 }
 
 sub get_database_name_from_id {
-    my($database_id) = @_;
-    return _get_type_name_from_id('databases', $database_id);
+    my($database_id, $timeout) = @_;
+    return _get_type_name_from_id('databases', $database_id, $timeout);
 }
 
 sub _get_type_name_from_id {
-    my($type, $id) = @_;
+    my($type, $id, $timeout) = @_;
 
     return undef unless defined $id;
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($timeout);
 
     my $req = HTTP::Request->new(GET => url_for($type, $id));
     my $rsp = $ua->request($req);
