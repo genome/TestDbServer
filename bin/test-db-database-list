@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use TestDbServer::CmdLine qw(get_user_agent url_for assert_success get_template_name_from_id foreach_database_or_template);
+use TestDbServer::CmdLine qw(get_template_name_from_id foreach_database_or_template);
 
 if (grep { $_ eq '--short-help'} @ARGV) {
     print_short_help();
