@@ -39,9 +39,11 @@ sub split_into_command_to_run_and_args {
     return ($base_command_path, @argv);
 }
 
+sub default_timeout { $ENV{TESTDBSERVER_TIMEOUT} || 5 }
+
 my $ua;
 sub get_user_agent {
-    my $timeout = shift || 5;
+    my $timeout = shift || default_timeout();
     unless($ua) {
         $ua = LWP::UserAgent->new;
         $ua->agent("TestDbServer::CmdLine/0.1 ");
