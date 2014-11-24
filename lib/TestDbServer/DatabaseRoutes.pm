@@ -130,7 +130,10 @@ sub create {
         $self->app->log->info("create database from template $template_id");
     }
     else {
-        $self->app->log->info("create database from default template");
+        my $default_template_name = $self->app->configuration->default_template_name;
+        $self->app->log->info("create database from default template: $default_template_name");
+        $template_id = $schema->search_template(name => $default_template_name)
+                              ->next->id;
     }
     $self->_create_database_from_template($owner, $template_id);
 }

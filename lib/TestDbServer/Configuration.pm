@@ -10,6 +10,7 @@ has db_password         => ( is => 'rw' );
 has db_host             => ( is => 'rw' );
 has db_port             => ( is => 'rw' );
 has test_db_owner       => ( is => 'rw' );
+has default_template_name => ( is => 'rw' );
 
 sub new_from_app_config {
     my($class, $config) = @_;
