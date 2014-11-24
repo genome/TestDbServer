@@ -120,16 +120,6 @@ sub _hashref_for_database_obj {
     return \%h;
 }
 
-sub create {
-    my $self = shift;
-
-    my $owner = $self->req->param('owner');
-    my $template_id = $self->_resolve_template_id_for_creating_database();
-    $self->app->log->info("create database from template $template_id");
-
-    $self->_create_database_from_template($owner, $template_id);
-}
-
 sub _resolve_template_id_for_creating_database {
     my $self = shift;
 
@@ -145,12 +135,20 @@ sub _resolve_template_id_for_creating_database {
     return $template_id;
 }
 
-sub _create_database_from_template {
-    my($self, $owner, $template_id) = @_;
+sub create {
+    my $self = shift;
 
-    $self->_create_database_common(sub {
+    my $owner = $self->req->param('owner');
+    my $template_id = $self->_resolve_template_id_for_creating_database();
+    $self->app->log->info("create database from template $template_id");
+
+    my $schema = $self->app->db_storage;
+
+    my($database, $return_code);
+    try {
+        $schema->txn_do(sub {
             my($host, $port) = $self->app->host_and_port_for_created_database();
-            TestDbServer::Command::CreateDatabaseFromTemplate->new(
+            my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                             owner => $owner,
                             template_id => $template_id,
                             host => $host,
@@ -158,18 +156,6 @@ sub _create_database_from_template {
                             superuser => $self->app->configuration->db_user,
                             schema => $self->app->db_storage,
                     );
-        });
-}
-
-sub _create_database_common {
-    my($self, $cmd_creator_sub) = @_;
-
-    my $schema = $self->app->db_storage;
-
-    my($database, $return_code);
-    try {
-        $schema->txn_do(sub {
-            my $cmd = $cmd_creator_sub->();
             $database = $cmd->execute();
         });
     }
