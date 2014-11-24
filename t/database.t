@@ -10,7 +10,7 @@ use Data::UUID;
 
 use TestDbServer::Configuration;
 
-plan tests => 8;
+plan tests => 9;
 
 my $config = TestDbServer::Configuration->new_from_path();
 
@@ -143,8 +143,8 @@ sub _validate_location_header {
     };
 }
 
-subtest 'create new' => sub {
-    plan tests => 9;
+subtest 'create new with owner' => sub {
+    plan tests => 11;
 
     my $template_owner = $config->test_db_owner;
 
@@ -161,6 +161,29 @@ subtest 'create new' => sub {
 
     my $created_db_info = $test->tx->res->json;
     ok(_connect_to_created_database($created_db_info), 'connect to created database');
+
+    my $created_id = $test->tx->res->json->{id};
+    my $database = $app->db_storage()->find_database($created_id);
+    ok($database, 'database record');
+    is($database->owner, $template_owner, 'owner');
+};
+
+subtest 'create new without owner' => sub {
+    plan tests => 9;
+
+    my $test =
+        $t->post_ok('/databases')
+            ->status_is(201)
+            ->json_has('/id')
+            ->json_has('/host')
+            ->json_has('/port')
+            ->json_has('/name')
+            ->json_has('/expires');
+
+    my $created_id = $test->tx->res->json->{id};
+    my $database = $app->db_storage()->find_database($created_id);
+    ok($database, 'database record');
+    is($database->owner, $config->db_user, 'owner');
 };
 
 subtest 'delete' => sub {

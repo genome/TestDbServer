@@ -120,10 +120,11 @@ sub _hashref_for_database_obj {
     return \%h;
 }
 
-sub _resolve_template_id_for_creating_database {
+sub _resolve_template_id_and_owner_for_creating_database {
     my $self = shift;
 
     my $template_id = $self->req->param('based_on');
+    my $owner = $self->req->param('owner');
     unless ($template_id) {
         my $default_template_name = $self->app->configuration->default_template_name;
         $self->app->log->info("create database from default template: $default_template_name");
@@ -131,15 +132,19 @@ sub _resolve_template_id_for_creating_database {
         my $schema = $self->app->db_storage();
         $template_id = $schema->search_template(name => $default_template_name)
                               ->next->id;
+
+        # The real owner of this template is likely the postgres superuser.
+        # Instead, use this owner from the configuration
+        $owner ||= $self->app->configuration->db_user;
     }
-    return $template_id;
+
+    return($template_id, $owner);
 }
 
 sub create {
     my $self = shift;
 
-    my $owner = $self->req->param('owner');
-    my $template_id = $self->_resolve_template_id_for_creating_database();
+    my($template_id, $owner) = $self->_resolve_template_id_and_owner_for_creating_database();
     $self->app->log->info("create database from template $template_id");
 
     my $schema = $self->app->db_storage;
