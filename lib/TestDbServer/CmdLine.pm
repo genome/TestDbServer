@@ -39,12 +39,15 @@ sub split_into_command_to_run_and_args {
     return ($base_command_path, @argv);
 }
 
+sub default_timeout { $ENV{TESTDBSERVER_TIMEOUT} || 5 }
+
 my $ua;
 sub get_user_agent {
+    my $timeout = shift || default_timeout();
     unless($ua) {
         $ua = LWP::UserAgent->new;
         $ua->agent("TestDbServer::CmdLine/0.1 ");
-        $ua->timeout(5);
+        $ua->timeout($timeout);
     }
     return $ua;
 }
@@ -92,21 +95,21 @@ sub assert_success {
 }
 
 sub get_template_name_from_id {
-    my($template_id) = @_;
-    return _get_type_name_from_id('templates', $template_id);
+    my($template_id, $timeout) = @_;
+    return _get_type_name_from_id('templates', $template_id, $timeout);
 }
 
 sub get_database_name_from_id {
-    my($database_id) = @_;
-    return _get_type_name_from_id('databases', $database_id);
+    my($database_id, $timeout) = @_;
+    return _get_type_name_from_id('databases', $database_id, $timeout);
 }
 
 sub _get_type_name_from_id {
-    my($type, $id) = @_;
+    my($type, $id, $timeout) = @_;
 
     return undef unless defined $id;
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($timeout);
 
     my $req = HTTP::Request->new(GET => url_for($type, $id));
     my $rsp = $ua->request($req);
@@ -118,9 +121,9 @@ sub _get_type_name_from_id {
 }
 
 sub foreach_database_or_template {
-    my($type, $cb) = @_;
+    my($type, $cb, $timeout) = @_;
 
-    my $ua = get_user_agent();
+    my $ua = get_user_agent($timeout);
 
     my $req = HTTP::Request->new(GET => url_for($type));
     my $rsp = $ua->request($req);

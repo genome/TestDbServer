@@ -3,14 +3,15 @@
 use strict;
 use warnings;
 
-use TestDbServer::CmdLine qw(get_user_agent url_for assert_success get_template_name_from_id foreach_database_or_template);
+use TestDbServer::CmdLine qw(parse_opts get_template_name_from_id foreach_database_or_template);
 
-if (grep { $_ eq '--short-help'} @ARGV) {
+my $opts = parse_opts('timeout=i', 'short-help', 'help');
+if ($opts->{'short-help'} || $opts->{help}) {
     print_short_help();
     exit 0;
 }
 
-foreach_database_or_template('templates', \&print_template_info);
+foreach_database_or_template('templates', \&print_template_info, $opts->{timeout});
 
 sub print_template_info {
     my $template = shift;
@@ -20,5 +21,5 @@ sub print_template_info {
 }
 
 sub print_short_help {
-    print "list templates";
+    print "list templates\n";
 }

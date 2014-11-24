@@ -4,11 +4,11 @@ use TestDbServer::CmdLine qw(get_user_agent url_for assert_success parse_opts);
 use LWP;
 use JSON qw(decode_json);
 
-my $opts = parse_opts('owner=s', 'based-on=s', 'bash', 'short-help', 'help');
+my $opts = parse_opts('owner=s', 'based-on=s', 'timeout=i', 'bash', 'short-help', 'help');
 print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
-my $ua = get_user_agent();
+my $ua = get_user_agent($opts->{timeout});
 my @options = make_post_options($opts);
 my $req = HTTP::Request->new(POST => url_for('databases', \@options));
 my $rsp = $ua->request($req);
