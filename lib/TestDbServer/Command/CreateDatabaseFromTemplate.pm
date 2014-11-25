@@ -6,24 +6,17 @@ use TestDbServer::Exceptions;
 use Moose;
 use namespace::autoclean;
 
-use constant DEFAULT_TEMPLATE_NAME => 'template1';
-
 has owner => ( isa => 'Maybe[Str]', is => 'ro', required => 1 );
 has host => ( isa => 'Str', is => 'ro', required => 1 );
 has port => ( isa => 'Int', is => 'ro', required => 1 );
-has template_id => ( isa => 'Maybe[Str]', is => 'ro', required => 1 );
+has template_id => ( isa => 'Str', is => 'ro', required => 1 );
 has schema => ( isa => 'TestDbServer::Schema', is => 'ro', required => 1 );
 has superuser => ( isa => 'Str', is => 'ro', required => 1 );
 
 sub execute {
     my $self = shift;
 
-    my $default_template_id = $self->schema
-                                   ->search_template(name => DEFAULT_TEMPLATE_NAME)
-                                   ->next->id;
-    my $template_id = defined $self->template_id
-                    ? $self->template_id
-                    : $default_template_id;
+    my $template_id = $self->template_id;
 
     my $template = $self->schema->find_template($template_id);
     unless ($template) {
