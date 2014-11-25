@@ -115,7 +115,9 @@ sub _hashref_for_database_obj {
     my %h;
     @h{'id','name','owner','created','expires','template_id'}
         = map { $database->$_ } qw( database_id name owner create_time expire_time template_id );
-    @h{'host','port'} = $self->app->host_and_port_for_created_database();
+
+    $h{host} = $self->app->configuration->external_hostname;
+    $h{port} = $self->app->configuration->db_port;
 
     return \%h;
 }
