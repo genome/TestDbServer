@@ -17,8 +17,6 @@ my ($name, $db_name) = @ARGV;
 # validate name
 # validate db_name
 
-my $db_id = db_name_to_id($db_name, $opts->{timeout});
-
 my $ua = get_user_agent($opts->{timeout});
 
 my @payload = map { $_ => $opts->{$_} }
@@ -26,7 +24,7 @@ my @payload = map { $_ => $opts->{$_} }
               qw( note );
 push @payload,
     'name' => $name,
-    'based_on' => $db_id;
+    'based_on' => $db_name;
 
 my $req = POST(url_for('templates'),
                 Content_Type => 'form-data',
@@ -36,27 +34,6 @@ assert_success $rsp;
 
 printf "CREATED %s\n", $name;
 exit 0;
-
-sub db_name_to_id {
-    my $db_name = shift;
-    my $timeout = shift;
-
-    my $ua = get_user_agent($timeout);
-    my $req = HTTP::Request->new(GET => url_for('databases', [ name => $db_name ]));
-    my $rsp = $ua->request($req);
-    assert_success $rsp;
-
-    my $ids = decode_json($rsp->content);
-    if (! @$ids) {
-        print STDERR "There is no database with that name\n";
-        exit 2;
-    } elsif (@$ids > 1) {
-        print STDERR "There are multiple matches for that name?! (found ",scalar(@$ids),"\n";
-        exit 3;
-    }
-
-    return $ids->[0];
-}
 
 sub print_short_help {
     print "create a new database template from an existing database\n";

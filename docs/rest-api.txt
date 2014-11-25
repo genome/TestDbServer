@@ -53,13 +53,13 @@ Returns 404 if there's no template with that ID
 
 -------------------------------------------------------
 
-POST /templates?based_on=<database-id>&name=<name>
+POST /templates?based_on=<database-name>&name=<name>
 
-Dump the named database as a new template.  Also accepts the 'note' param.
+Save the named database as a new template.  Also accepts the 'note' param.
 'owner' is inherited from the given database-id.
 
 Returns 201 if successful and the URL of the new uploaded thing in the Location header
-Returns 404 if there's no database with that ID
+Returns 404 if there's no database with that name
 Returns 409 if there's already a template with that name
 
 --------------------------------------------------------

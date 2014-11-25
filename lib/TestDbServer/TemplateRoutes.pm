@@ -102,7 +102,7 @@ sub save {
         my $cmd = TestDbServer::Command::CreateTemplateFromDatabase->new(
                         name => $self->param('name') || undef,
                         note => $self->param('note') || undef,
-                        database_id => $self->param('based_on') || undef,
+                        database_name => $self->param('based_on') || undef,
                         schema => $schema,
                         superuser => $self->app->configuration->db_user,
                         host => $host,
