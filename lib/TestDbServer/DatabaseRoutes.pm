@@ -105,6 +105,12 @@ sub _remove_expired_databases {
         }
         catch {
             $self->app->log->error("expire database ".$database->database_id." failed: $_");
+            if (ref($_) && $_->isa('Exception::CannotDropDatabase')) {
+                $self->app->log->info('  removing database record');
+                $schema->txn_do(sub {
+                    $database->delete();
+                });
+            }
         };
     }
 }
