@@ -20,6 +20,8 @@ $app->configuration($config);
 
 my $uuid_gen = Data::UUID->new();
 
+$config->external_hostname( $uuid_gen->create_str );
+
 my @databases;
 subtest 'list' => sub {
     plan tests => 6;
@@ -64,7 +66,7 @@ subtest 'search' => sub {
 subtest 'get' => sub {
     plan tests => 14;
 
-    my $expected_host = $t->app->configuration->db_host;
+    my $expected_host = $t->app->configuration->external_hostname;
     my $expected_port = $t->app->configuration->db_port;
 
     $t->get_ok('/databases/'.$databases[0]->database_id)
@@ -109,7 +111,7 @@ subtest 'create from template' => sub {
             ->status_is(201)
             ->json_is('/owner' => $template->owner)
             ->json_has('/id')
-            ->json_has('/host')
+            ->json_is('/host', $config->external_hostname)
             ->json_has('/port')
             ->json_has('/name')
             ->json_has('/expires');
@@ -152,7 +154,7 @@ subtest 'create new' => sub {
         $t->post_ok("/databases?owner=$template_owner")
             ->status_is(201)
             ->json_has('/id')
-            ->json_has('/host')
+            ->json_is('/host', $config->external_hostname)
             ->json_has('/port')
             ->json_has('/name')
             ->json_has('/expires');
@@ -221,7 +223,7 @@ subtest 'update expire time' => sub {
         $t->patch_ok("${db_url}?ttl=${expire_ttl}")
             ->status_is(200)
             ->json_has('/id')
-            ->json_has('/host')
+            ->json_is('/host', $config->external_hostname)
             ->json_has('/port')
             ->json_has('/name')
             ->json_has('/expires');
@@ -239,8 +241,10 @@ subtest 'update expire time' => sub {
 sub _connect_to_created_database {
     my $created_db_info = shift;
 
-    my $dbh = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
-                                    @$created_db_info{'name','host','port'}),
+    # The test configures a bogus external_hostname we can't really connect to
+    my $real_host = $app->configuration->db_host;
+    my $dbh = DBI->connect(sprintf('dbi:Pg:dbname=%s;port=%s;host=%s',
+                                    @$created_db_info{'name','port'}, $real_host),
                             $created_db_info->{owner},
                             '');
     return $dbh;
