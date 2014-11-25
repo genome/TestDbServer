@@ -37,7 +37,7 @@ use Exception::Class (
 
     Exception::TemplateNotFound => {
         isa => 'Exception::BaseException',
-        fields => [qw(template_id)],
+        fields => [qw(name)],
     },
 
     Exception::RoleNotFound => {

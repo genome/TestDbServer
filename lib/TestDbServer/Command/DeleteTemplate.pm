@@ -13,7 +13,7 @@ sub execute {
 
     my $template = $self->schema->find_template($self->template_id);
     unless ($template) {
-        Exception::TemplateNotFound->throw(template_id => $self->template_id);
+        Exception::TemplateNotFound->throw(name => $self->template_id);
     }
 
     $template->delete();
