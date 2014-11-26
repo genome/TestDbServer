@@ -7,7 +7,7 @@ use namespace::autoclean;
 
 has name => ( isa => 'Str', is => 'ro', required => 1 );
 has note => ( isa => 'Maybe[Str]', is => 'ro', required => 1 );
-has database_id => ( isa => 'Str', is => 'ro', required => 1 );
+has database_name => ( isa => 'Str', is => 'ro', required => 1 );
 has schema => ( isa => 'TestDbServer::Schema', is => 'ro', required => 1 );
 has superuser => ( isa => 'Str', is => 'ro', required => 1 );
 has host => ( isa => 'Str', is => 'ro', required => 1 );
@@ -16,9 +16,9 @@ has port => ( isa => 'Str', is => 'ro', required => 1 );
 sub execute {
     my $self = shift;
 
-    my $database = $self->schema->find_database($self->database_id);
+    my $database = $self->schema->search_database(name => $self->database_name)->next();
     unless ($database) {
-        Exception::DatabaseNotFound->throw(database_id => $self->database_id);
+        Exception::DatabaseNotFound->throw(name => $self->database_name);
     }
 
     my $pg = TestDbServer::PostgresInstance->new(

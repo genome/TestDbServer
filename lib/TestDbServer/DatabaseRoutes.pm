@@ -122,32 +122,28 @@ sub _hashref_for_database_obj {
     return \%h;
 }
 
-sub _resolve_template_id_and_owner_for_creating_database {
+sub _resolve_template_name_and_owner_for_creating_database {
     my $self = shift;
 
-    my $template_id = $self->req->param('based_on');
+    my $template_name = $self->req->param('based_on');
     my $owner = $self->req->param('owner');
-    unless ($template_id) {
-        my $default_template_name = $self->app->configuration->default_template_name;
-        $self->app->log->info("create database from default template: $default_template_name");
-
-        my $schema = $self->app->db_storage();
-        $template_id = $schema->search_template(name => $default_template_name)
-                              ->next->id;
+    unless ($template_name) {
+        $template_name = $self->app->configuration->default_template_name;
+        $self->app->log->info("create database from default template: $template_name");
 
         # The real owner of this template is likely the postgres superuser.
         # Instead, use this owner from the configuration
         $owner ||= $self->app->configuration->db_user;
     }
 
-    return($template_id, $owner);
+    return ($template_name, $owner);
 }
 
 sub create {
     my $self = shift;
 
-    my($template_id, $owner) = $self->_resolve_template_id_and_owner_for_creating_database();
-    $self->app->log->info("create database from template $template_id");
+    my($template_name, $owner) = $self->_resolve_template_name_and_owner_for_creating_database();
+    $self->app->log->info("create database from template $template_name");
 
     my $schema = $self->app->db_storage;
 
@@ -157,7 +153,7 @@ sub create {
             my($host, $port) = $self->app->host_and_port_for_created_database();
             my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
                             owner => $owner,
-                            template_id => $template_id,
+                            template_name => $template_name,
                             host => $host,
                             port => $port,
                             superuser => $self->app->configuration->db_user,

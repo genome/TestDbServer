@@ -32,12 +32,12 @@ use Exception::Class (
 
     Exception::DatabaseNotFound => {
         isa => 'Exception::BaseException',
-        fields => [qw(database_id)],
+        fields => [qw(name)],
     },
 
     Exception::TemplateNotFound => {
         isa => 'Exception::BaseException',
-        fields => [qw(template_id)],
+        fields => [qw(name)],
     },
 
     Exception::RoleNotFound => {

@@ -96,7 +96,7 @@ subtest 'delete' => sub {
 };
 
 subtest 'based on database' => sub {
-    plan tests => 18;
+    plan tests => 16;
 
     my $template_owner = $config->test_db_owner;
 
@@ -106,10 +106,10 @@ subtest 'based on database' => sub {
             ->json_has('/id');
 
     my $database_details = $create_database->tx->res->json;
-    my $database_id = $database_details->{id};
+    my $database_name = $database_details->{name};
 
     my $template_name = TestDbServer::PostgresInstance::unique_db_name();
-    my $creation = $t->post_ok("/templates?based_on=${database_id}&name=${template_name}")
+    my $creation = $t->post_ok("/templates?based_on=${database_name}&name=${template_name}")
         ->status_is(201)
         ->header_like('Location' => qr(/templates/\w+), 'Location header');
 
@@ -119,16 +119,13 @@ subtest 'based on database' => sub {
         ->json_is('/name', $template_name)
         ->json_is('/owner', $template_owner);
 
-    $t->post_ok("/templates?based_on=$database_id")  # missing name param
+    $t->post_ok("/templates?based_on=$database_name")  # missing name param
         ->status_is(400);
 
-    $t->post_ok("/templates?based_on=99999&name=qwerty")  # template does not exist with this id
+    $t->post_ok("/templates?based_on=bogus&name=qwerty")  # database does not exist with this name
         ->status_is(404);
 
-    $t->post_ok("/templates?based_on=bogus&name=qwerty")  # bogus template id
-        ->status_is(400);
-
-    $t->post_ok("/templates?based_on=$database_id&name=${template_name}") # same as first
+    $t->post_ok("/templates?based_on=$database_name&name=${template_name}") # same as first
         ->status_is(409);
 };
 

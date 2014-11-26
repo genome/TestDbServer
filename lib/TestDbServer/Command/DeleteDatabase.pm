@@ -17,7 +17,7 @@ sub execute {
 
     my $database = $self->schema->find_database($self->database_id);
     unless ($database) {
-        Exception::DatabaseNotFound->throw(database_id => $self->database_id);
+        Exception::DatabaseNotFound->throw(name => $self->database_id);
     }
 
     my $pg = TestDbServer::PostgresInstance->new(

@@ -21,8 +21,6 @@ use TestDbServer::Command::DeleteDatabase;
 my $config = TestDbServer::Configuration->new_from_path();
 my $schema = create_new_schema($config);
 my $uuid_gen = Data::UUID->new();
-my $blank_template_id = $schema->search_template(name => $config->default_template_name)
-                               ->next->id;
 
 plan tests => 7;
 
@@ -50,7 +48,7 @@ subtest 'create template from database' => sub {
     my $cmd = TestDbServer::Command::CreateTemplateFromDatabase->new(
                     name => $new_template_name,
                     note => 'new template from database',
-                    database_id => $database->database_id,
+                    database_name => $database->name,
                     schema => $schema,
                     superuser => $config->db_user,
                     host => $pg->host,
@@ -107,7 +105,7 @@ subtest 'create database with owner' => sub {
                     owner => $new_owner,
                     host => $config->db_host,
                     port => $config->db_port,
-                    template_id => $template->template_id,
+                    template_name => $template->name,
                     schema => $schema,
                     superuser => $config->db_user,
                 );
@@ -162,7 +160,7 @@ subtest 'create database with invalid owner' => sub {
                     owner => $invalid_owner,
                     host => $config->db_host,
                     port => $config->db_port,
-                    template_id => $template->template_id,
+                    template_name => $template->name,
                     schema => $schema,
                     superuser => $config->db_user,
                 );
@@ -198,7 +196,7 @@ subtest 'create database from template' => sub {
                     owner => undef,
                     host => $config->db_host,
                     port => $config->db_port,
-                    template_id => $template->template_id,
+                    template_name => $template->name,
                     schema => $schema,
                     superuser => $config->db_user,
                 );
@@ -254,7 +252,7 @@ subtest 'delete database' => sub {
                             port => $config->db_port,
                             owner => $config->test_db_owner,
                             superuser => $config->db_user,
-                            template_id => $blank_template_id,
+                            template_name => $config->default_template_name,
                             schema => $schema,
                     )->execute();
     ok($database, 'Created database to delete');
@@ -291,7 +289,7 @@ subtest 'delete with connections' => sub {
                             port => $config->db_port,
                             owner => $config->test_db_owner,
                             superuser => $config->db_user,
-                            template_id => $blank_template_id,
+                            template_name => $config->default_template_name,
                             schema => $schema,
                     )->execute();
     ok($database, 'Create database');

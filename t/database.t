@@ -88,7 +88,7 @@ subtest 'get' => sub {
 };
 
 subtest 'create from template' => sub {
-    plan tests => 16;
+    plan tests => 14;
 
     my $db = $app->db_storage();
     my $pg = TestDbServer::PostgresInstance->new(
@@ -107,7 +107,7 @@ subtest 'create from template' => sub {
     sleep(1);  # allow the last_used_time to change
 
     my $test =
-        $t->post_ok("/databases?based_on=" . $template->template_id)
+        $t->post_ok("/databases?based_on=" . $template->name)
             ->status_is(201)
             ->json_is('/owner' => $template->owner)
             ->json_has('/id')
@@ -126,11 +126,8 @@ subtest 'create from template' => sub {
          $template->last_used_time,
          'Template last used time was updated');
 
-    $t->post_ok('/databases?based_on=347394')
-        ->status_is(404, 'Cannot create DB based on bogus template_id');
-
     $t->post_ok('/databases?based_on=bogus')
-        ->status_is(400, 'Cannot create DB based on bogus template_id');
+        ->status_is(404, 'Cannot create DB based on bogus template_id');
 };
 
 sub _validate_location_header {
