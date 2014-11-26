@@ -81,7 +81,16 @@ subtest 'get' => sub {
 subtest 'delete' => sub {
     plan tests => 8;
 
-    my $template_id = $templates[0]->template_id;
+    my $template_to_delete = $templates[0];
+    my $template_id = $template_to_delete->id;
+
+    # The template has to exist as a real database before we can delete it
+    my $dbh = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
+                                    $config->default_template_name, $config->db_host, $config->db_port),
+                            $config->db_user, '');
+    $dbh->do(sprintf('CREATE DATABASE "%s"', $template_to_delete->name));
+    $dbh->disconnect;
+
     $t->delete_ok("/templates/$template_id")
         ->status_is(204);
 

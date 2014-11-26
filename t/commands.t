@@ -207,7 +207,7 @@ subtest 'create database from template' => sub {
 };
 
 subtest 'delete template' => sub {
-    plan tests => 3;
+    plan tests => 4;
 
     my $pg = new_pg_instance();
 
@@ -218,12 +218,17 @@ subtest 'delete template' => sub {
 
     my $cmd = TestDbServer::Command::DeleteTemplate->new(
                 template_id => $template->template_id,
-                schema => $schema);
+                schema => $schema,
+                host => $config->db_host,
+                port => $config->db_port,
+                superuser => $config->db_user);
     ok($cmd, 'new');
     ok($cmd->execute(), 'execute');
 
     ok(! $schema->find_template($template->template_id),
-        'template is deleted');
+        'template record is deleted');
+
+    ok(! _connect_to_database($pg->name, $pg->owner), 'cannot connect to deleted template database');
 };
 
 subtest 'delete database' => sub {

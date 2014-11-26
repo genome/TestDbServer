@@ -151,9 +151,13 @@ sub delete {
 
     my $return_code;
     try {
+        my($host, $port) = $self->app->host_and_port_for_created_database();
         my $cmd = TestDbServer::Command::DeleteTemplate->new(
                     template_id => $id,
                     schema => $schema,
+                    superuser => $self->app->configuration->db_user,
+                    host => $host,
+                    port => $port,
                 );
         $schema->txn_do(sub {
             $cmd->execute();
