@@ -12,4 +12,4 @@ mod "puppetlabs/vcsrepo",
 
 mod "nnutter/testdb",
     :git => "https://github.com/nnutter/nnutter-testdb.git",
-    :ref => "0.1.5"
+    :ref => "0.1.9"

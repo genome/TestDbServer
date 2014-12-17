@@ -12,10 +12,10 @@ FORGE
 
 GIT
   remote: https://github.com/nnutter/nnutter-testdb.git
-  ref: 0.1.5
-  sha: a5c14efebbbd7cdfa3b0aa9a007739f72dff0e61
+  ref: 0.1.9
+  sha: 78e52748bf087b6338ad9bab9a8beea25c87311d
   specs:
-    nnutter-testdb (0.1.5)
+    nnutter-testdb (0.1.9)
       nnutter-perlbrew (>= 0)
       puppetlabs-apache (>= 0)
       puppetlabs-postgresql (>= 0)
