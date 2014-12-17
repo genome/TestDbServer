@@ -44,8 +44,7 @@ sub print_help {
     print <<"EOS";
 Usage: $0 [--owner <owner>] [--based-on <template>] [--bash]
 
-Create a new test database.  You must specify either --owner or --based-on,
-but not both.
+Create a new test database.
 
 If run with --owner, it creates a new, empty test database with the given
 owner.  This owner must already exist as a role on the database server.
