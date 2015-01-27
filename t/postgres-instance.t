@@ -18,13 +18,14 @@ my $host = $config->db_host;
 my $port = $config->db_port;
 my $superuser = $config->db_user;
 my $owner = $config->test_db_owner;
+my $connect_db_name = $config->default_template_name;
 
 subtest 'create from template param validation' => sub {
-    plan tests => 3;
+    plan tests => 4;
 
     my $invalid_sql = q{'Robert'); DROP TABLE students; --};
-    my %valid_params = ( host => $host, port => $port, owner => $owner, superuser => $superuser );
-    foreach my $check_param ( qw( name owner ) ) {
+    my %valid_params = ( host => $host, port => $port, owner => $owner, superuser => $superuser, connect_db_name => $connect_db_name );
+    foreach my $check_param ( qw( name owner connect_db_name ) ) {
         throws_ok { TestDbServer::PostgresInstance->new(
                         %valid_params,
                         $check_param => $invalid_sql,
@@ -91,6 +92,7 @@ subtest 'create duplicate database' => sub {
     ok($original_pg->createdb_from_template('template1'), 'Create original DB');
 
     my $copy_pg = TestDbServer::PostgresInstance->new(
+                connect_db_name => $connect_db_name,
                 host => $host,
                 port => $port,
                 owner => $owner,
@@ -130,6 +132,7 @@ sub connect_to_db {
 
 sub create_pg_object_from_config {
     return TestDbServer::PostgresInstance->new(
+                connect_db_name => $connect_db_name,
                 host => $host,
                 port => $port,
                 owner => $owner,
