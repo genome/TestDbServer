@@ -309,7 +309,7 @@ sub new_pg_instance {
             owner => $config->test_db_owner,
             superuser => $config->db_user,
         );
-    $pg->createdb_from_template('template1');
+    $pg->createdb_from_template($config->default_template_name);
     return $pg;
 }
 

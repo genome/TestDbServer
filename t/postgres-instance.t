@@ -47,7 +47,7 @@ subtest 'create connect delete' => sub {
     ok($pg, 'Created new PostgresInstance');
     ok($pg->name, 'has a name: '. $pg->name);
 
-    ok($pg->createdb_from_template('template1'), 'Create database');
+    ok($pg->createdb_from_template($config->default_template_name), 'Create database');
 
     my $db_name = $pg->name;
     ok(connect_to_db($db_name), 'Connected');
@@ -60,7 +60,7 @@ subtest 'create db from template' => sub {
     plan tests => 5;
 
     my $original_pg = create_pg_object_from_config();
-    ok($original_pg->createdb_from_template('template1'), 'Create original DB');
+    ok($original_pg->createdb_from_template($config->default_template_name), 'Create original DB');
     {
         my $dbi = DBI->connect(sprintf('dbi:Pg:dbname=%s;host=%s;port=%s',
                                         $original_pg->name, $original_pg->host, $original_pg->port),
@@ -89,7 +89,7 @@ subtest 'create duplicate database' => sub {
     plan tests => 2;
 
     my $original_pg = create_pg_object_from_config();
-    ok($original_pg->createdb_from_template('template1'), 'Create original DB');
+    ok($original_pg->createdb_from_template($config->default_template_name), 'Create original DB');
 
     my $copy_pg = TestDbServer::PostgresInstance->new(
                 connect_db_name => $connect_db_name,
@@ -99,7 +99,7 @@ subtest 'create duplicate database' => sub {
                 superuser => $superuser,
                 name => $original_pg->name,
             );
-    throws_ok { $copy_pg->createdb_from_template('template1') }
+    throws_ok { $copy_pg->createdb_from_template($config->default_template_name) }
             'Exception::CannotCreateDatabase',
             'Creating a database with duplicate name throws exception';
 };
@@ -118,7 +118,7 @@ subtest 'is_valid_database' => sub {
     my $pg = create_pg_object_from_config();
     ok(! $pg->is_valid_database($pg->name), 'database does not exist yet');
 
-    ok($pg->createdb_from_template('template1'), 'create database');
+    ok($pg->createdb_from_template($config->default_template_name), 'create database');
     ok($pg->is_valid_database($pg->name), 'database exists now');
 
     ok($pg->dropdb, 'delete database');
