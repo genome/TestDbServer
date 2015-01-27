@@ -54,7 +54,7 @@ has '_admin_dbh' => (
 sub _build_admin_dbh {
     my $self = shift;
     my($host, $port, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'superuser', 'superuser_passwd' );
-    return DBI->connect_cached("dbi:Pg:dbname=template1;port=$port;host=$host",
+    return DBI->connect("dbi:Pg:dbname=template1;port=$port;host=$host",
                                $user, $pass,
                                { RaiseError => 1, PrintError => 0 });
 }
