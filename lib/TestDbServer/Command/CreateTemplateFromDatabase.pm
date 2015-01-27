@@ -22,6 +22,7 @@ sub execute {
     }
 
     my $pg = TestDbServer::PostgresInstance->new(
+                    connect_db_name => $database->name,
                     host => $self->host,
                     port => $self->port,
                     owner => $database->owner,

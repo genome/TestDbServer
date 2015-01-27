@@ -25,6 +25,7 @@ sub execute {
 
     my $owner = $self->owner || $template->owner;
     my $pg = TestDbServer::PostgresInstance->new(
+                        connect_db_name => $template_name,
                         host => $self->host,
                         port => $self->port,
                         owner => $owner,

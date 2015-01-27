@@ -10,6 +10,7 @@ has schema => (isa => 'TestDbServer::Schema', is => 'ro', required => 1 );
 has superuser => ( isa => 'Str', is => 'ro', required => 1 );
 has host => ( isa => 'Str', is => 'ro', required => 1 );
 has port => ( isa => 'Str', is => 'ro', required => 1 );
+has connect_db_name => ( isa => 'Str', is => 'ro', required => 1 );
 
 foreach my $subname ( qw( _entity_find_method _entity_id_method _not_found_exception )) {
     no strict 'refs';
@@ -28,7 +29,7 @@ sub execute {
     }
 
     my $pg = TestDbServer::PostgresInstance->new(
-                        name => $entity->name,
+                        connect_db_name => $entity->name,
                         host => $self->host,
                         port => $self->port,
                         owner => $entity->owner,
