@@ -158,6 +158,7 @@ sub delete {
                     superuser => $self->app->configuration->db_user,
                     host => $host,
                     port => $port,
+                    connect_db_name => $self->app->configuration->default_template_name,
                 );
         $schema->txn_do(sub {
             $cmd->execute();

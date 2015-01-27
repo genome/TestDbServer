@@ -68,6 +68,7 @@ subtest 'create template from database' => sub {
 
     # remove the template database
     TestDbServer::PostgresInstance->new(
+                        connect_db_name => $config->default_template_name,
                         host => $pg->host,
                         port => $pg->port,
                         owner => $template->owner,
@@ -118,6 +119,7 @@ subtest 'create database with owner' => sub {
 
     # remove the created database
     TestDbServer::PostgresInstance->new(
+                        connect_db_name => $config->default_template_name,
                         host => $config->db_host,
                         port => $config->db_port,
                         owner => $database->owner,
@@ -198,6 +200,7 @@ subtest 'create database from template' => sub {
 
     # remove the created database
     TestDbServer::PostgresInstance->new(
+                        connect_db_name => $config->default_template_name,
                         host => $config->db_host,
                         port => $config->db_port,
                         owner => $database->owner,
@@ -300,12 +303,13 @@ subtest 'delete with connections' => sub {
 
 sub new_pg_instance {
     my $pg = TestDbServer::PostgresInstance->new(
+            connect_db_name => $config->default_template_name,
             host => $config->db_host,
             port => $config->db_port,
             owner => $config->test_db_owner,
             superuser => $config->db_user,
         );
-    $pg->createdb_from_template('template1');
+    $pg->createdb_from_template($config->default_template_name);
     return $pg;
 }
 

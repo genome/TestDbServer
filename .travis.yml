@@ -12,4 +12,5 @@ perl:
 env: TEST_DB_CONF=test_db_server.travis-ci.conf PGUSER=postgres
 before_script:
   - make clean
+  - createdb -T template1 template2
 script: prove -lvr t/

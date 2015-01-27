@@ -25,6 +25,11 @@ has 'port' => (
     isa => 'Int',
     required => 1,
 );
+has 'connect_db_name' => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1,
+);
 has 'owner' => (
     is => 'ro',
     isa => 'pg_identifier',
@@ -53,8 +58,8 @@ has '_admin_dbh' => (
 
 sub _build_admin_dbh {
     my $self = shift;
-    my($host, $port, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'superuser', 'superuser_passwd' );
-    return DBI->connect_cached("dbi:Pg:dbname=template1;port=$port;host=$host",
+    my($host, $port, $name, $user, $pass) = map { $self->$_ } ( 'host', 'port', 'connect_db_name', 'superuser', 'superuser_passwd' );
+    return DBI->connect_cached("dbi:Pg:dbname=$name;port=$port;host=$host",
                                $user, $pass,
                                { RaiseError => 1, PrintError => 0 });
 }
