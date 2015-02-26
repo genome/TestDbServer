@@ -19,7 +19,7 @@ if ($type ne 'database' and $type ne 'template') {
     exit 1;
 }
 if (@ARGV != 1) {
-    print STDERR "Exactly one can be deleted, got ",scalar(@ARGV);
+    printf STDERR "Exactly one %s can be deleted, got %d\n",$type,scalar(@ARGV);
     exit 1;
 }
 
