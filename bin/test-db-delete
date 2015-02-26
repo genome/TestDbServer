@@ -12,6 +12,8 @@ print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
 my $type = shift @ARGV;
+print_help() unless defined $type;
+
 if ($type ne 'database' and $type ne 'template') {
     print STDERR "Cannot delete a $type\n";
     exit 1;
