@@ -12,14 +12,14 @@ print_short_help() if ($opts->{'short-help'});
 print_help() if ($opts->{help});
 
 my $type = shift @ARGV;
-print_help() unless defined $type;
+print_help(1) unless defined $type;
 
 if ($type ne 'database' and $type ne 'template') {
     print STDERR "Cannot delete a $type\n";
     exit 1;
 }
 if (@ARGV != 1) {
-    print STDERR "Exactly one can be deleted, got ",scalar(@ARGV);
+    printf STDERR "Exactly one %s can be deleted, got %d\n",$type,scalar(@ARGV);
     exit 1;
 }
 
@@ -64,11 +64,12 @@ sub print_short_help {
 }
 
 sub print_help {
+    my $exit = shift || 0;
     print <<"EOS";
 Usage: $0 template <name>
        $0 database <name>
 
 Delete a template or a database.
 EOS
-    exit;
+    exit $exit;
 }

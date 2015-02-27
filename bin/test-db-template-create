@@ -16,6 +16,15 @@ my ($name, $db_name) = @ARGV;
 
 # validate name
 # validate db_name
+unless (defined $name) {
+    print STDERR "NAME is required\n";
+    exit 1;
+}
+
+unless (defined $db_name) {
+    print STDERR "DB_ID is required\n";
+    exit 1;
+}
 
 my $ua = get_user_agent($opts->{timeout});
 

@@ -52,6 +52,8 @@ sub show_help {
     foreach my $help ( @help ) {
         printf("%-${max_width}s %s\n", @$help);
     }
+
+    exit(1);
 }
 
 sub alter_perl5lib_for_testdbserver_libs {
