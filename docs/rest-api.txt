@@ -128,6 +128,8 @@ Returns 201 and JSON in the body
 }
 The Location header will be the URL for this entity
 
+Returns 503 if the database server was not able to create the requested database
+
 -----------------------------------------------------
 
 POST /databases?based_on=<template-name>
@@ -149,6 +151,7 @@ Returns 201 and JSON in the body
 The Location header will be the URL for this entity
 
 Returns 404 if there is no template with that name
+Returns 503 if the database server was not able to create the requested database
 
 ---------------------------------------------------------
 

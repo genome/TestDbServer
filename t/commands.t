@@ -22,7 +22,7 @@ my $config = TestDbServer::Configuration->new_from_path();
 my $schema = create_new_schema($config);
 my $uuid_gen = Data::UUID->new();
 
-plan tests => 7;
+plan tests => 8;
 
 subtest 'create template from database' => sub {
     plan tests => 5;
@@ -204,6 +204,25 @@ subtest 'create database from template' => sub {
                         superuser => $config->db_user,
                         name => $database->name
             )->dropdb;
+};
+
+subtest 'failed create database throws exception' => sub {
+    plan tests => 1;
+
+    local *DBI::db::do = sub { die "Fake!" };
+
+    my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                    owner => undef,
+                    host => $config->db_host,
+                    port => $config->db_port,
+                    template_name => $config->default_template_name,
+                    schema => $schema,
+                    superuser => $config->db_user,
+                );
+
+    throws_ok { $cmd->execute() }
+            'Exception::CannotCreateDatabase',
+            'Caught "CannotCreateDatabase" when create database dies';
 };
 
 subtest 'delete template' => sub {
