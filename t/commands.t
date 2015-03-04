@@ -22,7 +22,7 @@ my $config = TestDbServer::Configuration->new_from_path();
 my $schema = create_new_schema($config);
 my $uuid_gen = Data::UUID->new();
 
-plan tests => 7;
+plan tests => 8;
 
 subtest 'create template from database' => sub {
     plan tests => 5;
@@ -229,6 +229,45 @@ subtest 'delete template' => sub {
         'template record is deleted');
 
     ok(! _connect_to_database($pg->name, $pg->owner), 'cannot connect to deleted template database');
+};
+
+subtest 'delete template with databases' => sub {
+    plan tests => 7;
+
+    my $pg = new_pg_instance();
+
+    my $template = $schema->create_template(
+                                name => $pg->name,
+                                owner => $pg->owner,
+                            );
+    ok($template, 'create template');
+
+    my $create_db_command = TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                    owner => undef,
+                    host => $config->db_host,
+                    port => $config->db_port,
+                    template_name => $template->name,
+                    schema => $schema,
+                    superuser => $config->db_user,
+                );
+    my $database = $create_db_command->execute();
+    ok($database, 'create db from template');
+
+    my $delete_tmpl_command = TestDbServer::Command::DeleteTemplate->new(
+                template_id => $template->template_id,
+                schema => $schema,
+                host => $config->db_host,
+                port => $config->db_port,
+                superuser => $config->db_user);
+    ok($delete_tmpl_command->execute(), 'delete template');
+
+    ok(! _connect_to_database($template->name, $template->owner), 'cannot connect to deleted template database');
+    ok( _connect_to_database($database->name, $database->owner), 'can connect to derived database');
+
+    my $template_record = $schema->find_template($template->template_id);
+    ok(! $template_record, 'template record was deleted');
+    my $database_record = $schema->find_database($database->database_id);
+    is($database_record->template_id, undef, q(database record's template_id is now null));
 };
 
 subtest 'delete database' => sub {
