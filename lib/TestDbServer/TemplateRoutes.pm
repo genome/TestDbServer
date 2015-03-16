@@ -81,7 +81,7 @@ sub get {
 
     } else {
         $self->app->log->info("template $id not found");
-        $self->render_not_found;
+        $self->render(status => 404, text => "Template $id not found");
     }
 }
 
