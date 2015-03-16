@@ -167,7 +167,7 @@ sub create {
             $self->app->log->error('template not found');
             $return_code = 404;
 
-        } elsif ref($_) && $_->isa('Exception::CannotCreateDatabase')) {
+        } elsif (ref($_) && $_->isa('Exception::CannotCreateDatabase')) {
             $self->app->log->error("Cannot create database: $_");
             $return_code = 503;
 
