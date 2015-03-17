@@ -77,7 +77,7 @@ sub get {
 
     } else {
         $self->app->log->info("database $id not found");
-        $self->render_not_found;
+        $self->render(status => 404, text => "database $id not found");
     }
 }
 
