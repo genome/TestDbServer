@@ -206,6 +206,25 @@ subtest 'create database from template' => sub {
             )->dropdb;
 };
 
+subtest 'failed create database throws exception' => sub {
+    plan tests => 1;
+
+    local *DBI::db::do = sub { die "Fake!" };
+
+    my $cmd = TestDbServer::Command::CreateDatabaseFromTemplate->new(
+                    owner => undef,
+                    host => $config->db_host,
+                    port => $config->db_port,
+                    template_name => $config->default_template_name,
+                    schema => $schema,
+                    superuser => $config->db_user,
+                );
+
+    throws_ok { $cmd->execute() }
+            'Exception::CannotCreateDatabase',
+            'Caught "CannotCreateDatabase" when create database dies';
+};
+
 subtest 'delete template' => sub {
     plan tests => 4;
 
