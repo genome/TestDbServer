@@ -22,7 +22,7 @@ my $config = TestDbServer::Configuration->new_from_path();
 my $schema = create_new_schema($config);
 my $uuid_gen = Data::UUID->new();
 
-plan tests => 8;
+plan tests => 9;
 
 subtest 'create template from database' => sub {
     plan tests => 5;
