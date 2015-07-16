@@ -16,6 +16,7 @@ use warnings;
 use Exporter 'import';
 our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name
                     get_template_name_from_id get_database_name_from_id foreach_database_or_template
+                    get_template_by_id get_database_by_id
                     parse_opts);
 
 sub find_available_sub_command_paths {
@@ -132,14 +133,32 @@ sub foreach_database_or_template {
     my $id_list = decode_json($rsp->content);
     my $count = 0;
     foreach my $id ( @$id_list ) {
-        my $req = HTTP::Request->new(GET => url_for($type, $id));
-        my $rsp = $ua->request($req);
-        next unless eval { assert_success $rsp };
-        my $data = decode_json($rsp->content);
+        my $data = _get_type_by_id($type, $id, $timeout);
         $cb->($data);
         $count++;
     }
     return $count || '0 but true';
+}
+
+sub get_database_by_id {
+    my($id, $timeout) = @_;
+    return _get_type_by_id('databases', $id, $timeout);
+}
+
+sub get_template_by_id {
+    my($id, $timeout) = @_;
+    return _get_type_by_id('templates', $id, $timeout);
+}
+
+sub _get_type_by_id {
+    my($type, $id, $timeout) = @_;
+
+    my $ua = get_user_agent($timeout);
+    my $req = HTTP::Request->new(GET => url_for($type, $id));
+    my $rsp = $ua->request($req);
+    assert_success($rsp);
+    my $data = decode_json($rsp->content);
+    return $data;
 }
 
 sub parse_opts {
