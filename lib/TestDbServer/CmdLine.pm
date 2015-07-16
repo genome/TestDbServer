@@ -14,7 +14,7 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name database_id_from_name
+our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name
                     get_template_name_from_id get_database_name_from_id foreach_database_or_template
                     parse_opts);
 
