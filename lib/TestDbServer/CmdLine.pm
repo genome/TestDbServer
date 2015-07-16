@@ -17,6 +17,7 @@ use Exporter 'import';
 our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name
                     get_template_name_from_id get_database_name_from_id foreach_database_or_template
                     get_template_by_id get_database_by_id
+                    search_databases search_templates
                     parse_opts);
 
 sub find_available_sub_command_paths {
@@ -119,6 +120,36 @@ sub _get_type_name_from_id {
     }
     my $tmpl = decode_json($rsp->content);
     return $tmpl->{name};
+}
+
+sub search_databases {
+    my $timeout;
+    if (@_ % 2) {
+        $timeout = pop;
+    }
+    my @search_terms = @_;
+    return _search_type('databases', $timeout, @search_terms);
+}
+
+sub search_templates {
+    my $timeout;
+    if (@_ % 2) {
+        $timeout = pop;
+    }
+    my @search_terms = @_;
+    return _search_type('templates', $timeout, @search_terms);
+}
+
+sub _search_type {
+    my($type, $timeout, @search_terms) = @_;
+    return () unless @search_terms;
+
+    my $ua = get_user_agent($timeout);
+    my $req = HTTP::Request->new(GET => url_for($type, \@search_terms));
+    my $rsp = $ua->request($req);
+    assert_success($rsp);
+    my $results_list = decode_json($rsp->content);
+    return @$results_list;
 }
 
 sub foreach_database_or_template {
