@@ -14,8 +14,10 @@ use strict;
 use warnings;
 
 use Exporter 'import';
-our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name database_id_from_name
+our @EXPORT_OK = qw(get_user_agent url_for assert_success template_id_from_name
                     get_template_name_from_id get_database_name_from_id foreach_database_or_template
+                    get_template_by_id get_database_by_id
+                    search_databases search_templates
                     parse_opts);
 
 sub find_available_sub_command_paths {
@@ -120,6 +122,36 @@ sub _get_type_name_from_id {
     return $tmpl->{name};
 }
 
+sub search_databases {
+    my $timeout;
+    if (@_ % 2) {
+        $timeout = pop;
+    }
+    my @search_terms = @_;
+    return _search_type('databases', $timeout, @search_terms);
+}
+
+sub search_templates {
+    my $timeout;
+    if (@_ % 2) {
+        $timeout = pop;
+    }
+    my @search_terms = @_;
+    return _search_type('templates', $timeout, @search_terms);
+}
+
+sub _search_type {
+    my($type, $timeout, @search_terms) = @_;
+    return () unless @search_terms;
+
+    my $ua = get_user_agent($timeout);
+    my $req = HTTP::Request->new(GET => url_for($type, \@search_terms));
+    my $rsp = $ua->request($req);
+    assert_success($rsp);
+    my $results_list = decode_json($rsp->content);
+    return @$results_list;
+}
+
 sub foreach_database_or_template {
     my($type, $cb, $timeout) = @_;
 
@@ -132,14 +164,32 @@ sub foreach_database_or_template {
     my $id_list = decode_json($rsp->content);
     my $count = 0;
     foreach my $id ( @$id_list ) {
-        my $req = HTTP::Request->new(GET => url_for($type, $id));
-        my $rsp = $ua->request($req);
-        next unless eval { assert_success $rsp };
-        my $data = decode_json($rsp->content);
+        my $data = _get_type_by_id($type, $id, $timeout);
         $cb->($data);
         $count++;
     }
     return $count || '0 but true';
+}
+
+sub get_database_by_id {
+    my($id, $timeout) = @_;
+    return _get_type_by_id('databases', $id, $timeout);
+}
+
+sub get_template_by_id {
+    my($id, $timeout) = @_;
+    return _get_type_by_id('templates', $id, $timeout);
+}
+
+sub _get_type_by_id {
+    my($type, $id, $timeout) = @_;
+
+    my $ua = get_user_agent($timeout);
+    my $req = HTTP::Request->new(GET => url_for($type, $id));
+    my $rsp = $ua->request($req);
+    assert_success($rsp);
+    my $data = decode_json($rsp->content);
+    return $data;
 }
 
 sub parse_opts {
